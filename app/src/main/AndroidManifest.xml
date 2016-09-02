@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.mantz_it.rfanalyzer" >
+    package="com.mantz_it.rfanalyzer">
 
     <!-- Read external storage is used for the FileSource -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
