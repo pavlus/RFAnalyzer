@@ -56,7 +56,6 @@ private AnalyzerSurface view;
 private SoftFFT fftBlock;
 private ArrayBlockingQueue<SamplePacket> inputQueue = null;        // queue that delivers sample packets
 private ArrayBlockingQueue<SamplePacket> returnQueue = null;    // queue to return unused buffers
-
 /**
  * Constructor. Will initialize the member attributes.
  *
