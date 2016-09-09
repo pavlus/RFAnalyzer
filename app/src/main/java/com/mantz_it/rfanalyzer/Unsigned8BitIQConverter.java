@@ -134,4 +134,5 @@ public int mixPacketIntoSamplePacket(byte[] packet, SamplePacket samplePacket, i
 public int getSampleSize() {
 	return 1;
 }
+
 }
