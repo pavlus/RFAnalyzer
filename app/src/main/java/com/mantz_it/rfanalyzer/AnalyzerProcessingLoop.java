@@ -80,7 +80,6 @@ public AnalyzerProcessingLoop(AnalyzerSurface view, int fftSize,
 	this.inputQueue = inputQueue;
 	this.returnQueue = returnQueue;
 }
-
 public int getFrameRate() {
 	return frameRate;
 }
