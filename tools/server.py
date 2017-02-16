@@ -4,7 +4,6 @@ import time
 import socket
 from errno import EWOULDBLOCK
 import random
-
 packet_loose_prob=0.0 # probability of loosing packet from 0 to 1
 
 refClk = 122880000
@@ -81,6 +80,7 @@ print 'RX interface on ' + str(host) + ':' + str(rxPort)
 
 send = False
 file = open(dump_name, "rb")
+
 burst_cnt = 256;
 burst_iter = 0;
 while True:
