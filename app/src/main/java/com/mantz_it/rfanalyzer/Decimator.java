@@ -234,7 +234,6 @@ public class Decimator extends Thread {
 	 * @param factors        Output parameter, filled with factors for multistage decimation.
 	 * @return Selected output rate.
 	 */
-
 	public static int getOptimalDecimationOutputRate(
 			int minOutRate, int optimalOutRate, int maxOutRate,
 			int inputRate,
@@ -464,18 +463,6 @@ public class Decimator extends Thread {
 		return cnt;
 	}
 
-	/** Just returns sum of values in specified vector, but has task-specific name.
-	 *  Represents number of naïve multiplications needed to get the number from factorization.
-	 * @param powers collection of integers
-	 * @return sum of items in collection
-	 */
-	static int factorsCount(Iterable<Integer> powers) {
-		int cnt = 0;
-		for (int pow : powers) {
-			cnt += pow;
-		}
-		return cnt;
-	}
 
 	/**
 	 *
