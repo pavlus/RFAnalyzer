@@ -155,8 +155,7 @@ public class OptimalFIRDesigner {
 		// Make sure we use an odd number of taps
 		params = new RemezParams(params.order + (params.order + nextra_taps) % 2 + nextra_taps, params.bands, params.amplitudes, params.error_weights);
 		// The remezord typically under-estimates the filter order, so add 2 taps by default
-		double[] taps = Utils.Parks_McCellan_Remez(params.order, params.bands, params.amplitudes, params.error_weights, Filter.Type.BANDPASS);
-		return taps;
+		return Utils.Parks_McCellan_Remez(params.order, params.bands, params.amplitudes, params.error_weights, Filter.Type.BANDPASS);
 	}
 
 	/**
@@ -188,8 +187,7 @@ public class OptimalFIRDesigner {
 		params = new RemezParams(params.order + ((params.order + nextra_taps) & 1) + nextra_taps, params.bands, params.amplitudes, params.error_weights);
 
 		//The remezord typically under -estimates the filter order, so add 2 taps by default
-		double[] taps = Utils.Parks_McCellan_Remez(params.order, params.bands, params.amplitudes, params.error_weights, Filter.Type.BANDPASS);
-		return taps;
+		return Utils.Parks_McCellan_Remez(params.order, params.bands, params.amplitudes, params.error_weights, Filter.Type.BANDPASS);
 	}
 
 
@@ -298,7 +296,7 @@ public class OptimalFIRDesigner {
 	}
 
 	/**
-	 * See {@link #remezord(int[], double[], double[])}
+	 * See {@link #remezord(double[], double[], double[])}
 	 *
 	 * @param freqs
 	 * @param magnitudes
@@ -431,9 +429,7 @@ public class OptimalFIRDesigner {
 
 		double dinf = ((t1 + t2 + a3) * dds) + (t3 + t4 + a6);
 		double ff = b1 + b2 * (ddp - dds);
-		double n = dinf / df - ff * df + 1;
-		//System.out.println("lporder = " + n);
-		return n;
+		return dinf / df - ff * df + 1;
 	}
 
 	/**
@@ -472,8 +468,7 @@ public class OptimalFIRDesigner {
 
 		double cinf = dds * (t1 + t2 + a3) + t3 + t4 + a6;
 		double ginf = -14.6 * Math.log10(delta_p / delta_s) - 16.9;
-		double n = cinf / df + ginf * df + 1;
-		return n;
+		return cinf / df + ginf * df + 1;
 	}
 
 }
