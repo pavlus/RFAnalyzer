@@ -52,47 +52,6 @@ public void testGetOptimalDecimation() {
 	}
 }
 
-public void testHiQSDRPacketCntr() {
-	final byte[] buff = new byte[1442];
-	HiQSDRSource src = new HiQSDRSource();
-	src.previousPacketIdx = 0;
-	for (int i = 1; i < 520; ++i) {
-		buff[0] = (byte) (i & 0xff);
-		final int m = src.updatePacketIndex(buff);
-		if (m != 0)
-			System.out.println("testHiQSDRPacketCntr: false positive ("
-			                   + "i=" + i
-			                   + ", missed=" + m
-			                   + ", but must be 0).");
-		//else System.out.println("testHiQSDRPacketCntr: ok = "+m);
-	}
-	for (int j = 2; j < 255; ++j) {
-		src.previousPacketIdx = 0;
-		for (int i = j; i < j * 520; i += j) {
-			buff[0] = (byte) (i & 0xff);
-			final byte prev = src.previousPacketIdx;
-			final int m = src.updatePacketIndex(buff);
-			final byte current = src.previousPacketIdx;
-			if (m != (j - 1))
-				System.out.println("testHiQSDRPacketCntr: false negative ("
-				                   + "i=" + i
-				                   + ", j=" + j
-				                   + ",prev=" + prev
-				                   + ", current=" + current
-				                   + ", missed=" + m
-				                   + ", must be " + (j - 1) + ").");
-				/*else System.out.println("testHiQSDRPacketCntr: ok ("
-				                        + "i=" + i
-				                        + ", j=" + j
-				                        + ",prev=" + prev
-				                        + ", current=" + current
-				                        + ", missed=" + m
-				                        + ").");*/
-		}
-	}
-
-
-}
 
 public void testInitArrays() {
 	System.out.println("Testing HiQSDR.initArrays()");
