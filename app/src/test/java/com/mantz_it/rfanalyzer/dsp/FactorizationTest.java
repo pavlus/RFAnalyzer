@@ -78,9 +78,10 @@ public class FactorizationTest {
 		return elapsed;
 	}
 
+	@Ignore
 	@Test
 	public void testMinSumFactorsFuzzy() throws Exception {
-		final int COUNT = 100000;
+		final int COUNT = 10000;
 		final int MAX = 1000000;
 		double averageTime = 0;
 		long timeAccum = 0;
