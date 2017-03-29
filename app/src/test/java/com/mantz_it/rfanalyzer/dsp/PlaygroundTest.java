@@ -1,5 +1,6 @@
 package com.mantz_it.rfanalyzer.dsp;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Random;
  * Created by Pavel on 10.01.2017.
  */
 
+@Ignore
 public class PlaygroundTest {
 
 	@Test
