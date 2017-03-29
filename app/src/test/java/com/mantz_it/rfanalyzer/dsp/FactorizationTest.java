@@ -1,7 +1,9 @@
 package com.mantz_it.rfanalyzer.dsp;
 
-import com.mantz_it.rfanalyzer.HiQSDRSource;
+import com.mantz_it.rfanalyzer.device.hiqsdr.HiqsdrSource;
+import com.mantz_it.rfanalyzer.sdr.controls.RXSampleRate;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -23,8 +25,8 @@ public class FactorizationTest {
 	}
 
 	private void testODOR(int minRate, int maxRate, int idealRate) {
-		HiQSDRSource src = new HiQSDRSource("localhost", 0, 0, 0);
-		int[] inputRates = src.getSupportedSampleRates();
+		HiqsdrSource src = new HiqsdrSource("localhost", 0, 0, 0);
+		int[] inputRates = src.getControl(RXSampleRate.class).getSupportedSampleRates();
 		System.out.println("MinRate=" + minRate + " IdealRate=" + idealRate + " MaxRate=" + maxRate);
 		LinkedList<Integer> factors = new LinkedList<>();
 		for (int rate : inputRates) {

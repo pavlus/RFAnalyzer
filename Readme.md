@@ -1,4 +1,4 @@
-RF Analyzer for Android
+RF Analyzer for Android [![Build Status](https://travis-ci.org/pavlus/RFAnalyzer.svg?branch=master)](https://travis-ci.org/pavlus/RFAnalyzer)
 =======================
 
 This is the repository of the RF Analyzer app for Android. It can be used

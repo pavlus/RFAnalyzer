@@ -25,7 +25,7 @@ public class FilterBenchmark extends ApplicationTestCase<Application> {
 	}
 
 
-	public void testSizes() {
+	public void _testSizes() {
 		final int[] samplesCnt = {1<<4, 1<<5, 1<<6, 1<<7, 1<<8, 1<<9, 1 << 10, 1 << 11, 1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16, 1<<17};
 		int sampleRate = 1000000;
 		int rounds = 10000;
@@ -64,7 +64,7 @@ public class FilterBenchmark extends ApplicationTestCase<Application> {
 		}
 	}
 
-	public void testFilters() {
+	public void _testFilters() {
 		final int samplesCnt = Packet.PREFERRED_SIZE / 2;
 		final int decimation = 2;
 		float[] interleavedSamples = new float[samplesCnt << 1];
@@ -93,7 +93,7 @@ public class FilterBenchmark extends ApplicationTestCase<Application> {
 		out.release();
 	}
 
-	public void testComplexFirFilterPerformance() {
+	public void _testComplexFirFilterPerformance() {
 		int lowBound = 100;
 		int upBound = 3000;
 		int transition = 100;
