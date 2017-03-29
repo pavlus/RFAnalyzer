@@ -728,8 +728,7 @@ public static double[] Parks_McCellan_Remez(
     if (arg_amplitudes.length != bands.length)
         throw new IllegalArgumentException(LOGTAG + " must have one response magnitude for each band edge");
 
-    for (int i = 0; i < 2 * numbands; i++)
-        response[i] = arg_amplitudes[i];
+    System.arraycopy(arg_amplitudes, 0, response, 0, 2 * numbands);
 
     double[] weight = new double[numbands];
     Arrays.fill(weight, 1);
@@ -737,8 +736,7 @@ public static double[] Parks_McCellan_Remez(
     if (arg_errorWeights != null && arg_errorWeights.length > 0) {
         if (arg_errorWeights.length != numbands)
             throw new IllegalArgumentException(LOGTAG + " need one weight for each band [=length(band)/2]");
-        for (int i = 0; i < numbands; i++)
-            weight[i] = arg_errorWeights[i];
+        System.arraycopy(arg_errorWeights, 0, weight, 0, numbands);
     }
 
 			/*int itype = 0;
@@ -907,7 +905,7 @@ protected static class Grid {
     }
 }
 
-public static final float sum(Iterable<Float> n) {
+public static float sum(Iterable<Float> n) {
     float sum = 0;
     for (float x : n)
         sum += x;
