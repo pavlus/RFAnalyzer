@@ -46,9 +46,8 @@ private static final int[] QUADRATURE_RATE = {1,                // off; this val
 		2};    // USB
 private static final int INPUT_RATE = 384000;//1000000;    // Expected rate of the incoming samples
 
-
-	// DECIMATION
-	private Decimator decimator;    // will do INPUT_RATE --> QUADRATURE_RATE
+// DECIMATION
+private Decimator decimator;    // will do INPUT_RATE --> QUADRATURE_RATE
 
 // FILTERING (This is the channel filter controlled by the user)
 private static final int USER_FILTER_ATTENUATION = 20;
@@ -70,53 +69,54 @@ public static final int[] MAX_USER_FILTER_WIDTH = {
 		5000,    // LSB
 		5000};  // USB
 
-	// DEMODULATION
-	private SamplePacket demodulatorHistory;    // used for FM demodulation
-	private float lastMax = 0;    // used for gain control in AM / SSB demodulation
-	private ComplexFirFilter bandPassFilter = null;    // used for SSB demodulation
-	private static final int BAND_PASS_ATTENUATION = 40;
-	public static final int DEMODULATION_OFF = 0;
-	public static final int DEMODULATION_AM = 1;
-	public static final int DEMODULATION_NFM = 2;
-	public static final int DEMODULATION_WFM = 3;
-	public static final int DEMODULATION_LSB = 4;
-	public static final int DEMODULATION_USB = 5;
-	public int demodulationMode;
+// DEMODULATION
+private SamplePacket demodulatorHistory;    // used for FM demodulation
+private float lastMax = 0;    // used for gain control in AM / SSB demodulation
+private ComplexFirFilter bandPassFilter = null;    // used for SSB demodulation
+private static final int BAND_PASS_ATTENUATION = 40;
+public static final int DEMODULATION_OFF = 0;
+public static final int DEMODULATION_AM = 1;
+public static final int DEMODULATION_NFM = 2;
+public static final int DEMODULATION_WFM = 3;
+public static final int DEMODULATION_LSB = 4;
+public static final int DEMODULATION_USB = 5;
+public int demodulationMode;
 
-	// AUDIO OUTPUT
-	private AudioSink audioSink = null;        // Will do QUADRATURE_RATE --> AUDIO_RATE and audio output
+// AUDIO OUTPUT
+private AudioSink audioSink = null;        // Will do QUADRATURE_RATE --> AUDIO_RATE and audio output
 
-	/**
-	 * Constructor. Creates a new demodulator block reading its samples from the given input queue and
-	 * returning the buffers to the given output queue. Expects input samples to be at baseband (mixing
-	 * is done by the scheduler)
-	 *
-	 * @param inputQueue  Queue that delivers received baseband signals
-	 * @param outputQueue Queue to return used buffers from the inputQueue
-	 * @param packetSize  Size of the packets in the input queue
-	 */
-	public Demodulator(ArrayBlockingQueue<SamplePacket> inputQueue, ArrayBlockingQueue<SamplePacket> outputQueue, int packetSize) {
-		super("Demodulator Thread");
-		// Create internal sample buffers:
-		// Note that we create the buffers for the case that there is no downsampling necessary
-		// All other cases with input decimation > 1 are also possible because they only need
-		// smaller buffers.
-		this.quadratureSamples = new SamplePacket(packetSize);
+/**
+ * Constructor. Creates a new demodulator block reading its samples from the given input queue and
+ * returning the buffers to the given output queue. Expects input samples to be at baseband (mixing
+ * is done by the scheduler)
+ *
+ * @param inputQueue  Queue that delivers received baseband signals
+ * @param outputQueue Queue to return used buffers from the inputQueue
+ * @param packetSize  Size of the packets in the input queue
+ */
+public Demodulator(ArrayBlockingQueue<SamplePacket> inputQueue, ArrayBlockingQueue<SamplePacket> outputQueue, int packetSize) {
+	super("Demodulator Thread");
+	// Create internal sample buffers:
+	// Note that we create the buffers for the case that there is no downsampling necessary
+	// All other cases with input decimation > 1 are also possible because they only need
+	// smaller buffers.
+	this.quadratureSamples = new SamplePacket(packetSize);
 
-		// Create Audio Sink
-		this.audioSink = new AudioSink(packetSize, AUDIO_RATE);
+	// Create Audio Sink
+	this.audioSink = new AudioSink(packetSize, AUDIO_RATE);
 
 	// Create Decimator block
 	// Note that the decimator directly reads from the inputQueue and also returns processed packets to the
 	// output queue.
 	this.decimator = new Decimator(QUADRATURE_RATE[demodulationMode] * AUDIO_RATE, packetSize, inputQueue, outputQueue);
 }
-	/**
-	 * @return Demodulation Mode (DEMODULATION_OFF, *_AM, *_NFM, *_WFM, ...)
-	 */
-	public int getDemodulationMode() {
-		return demodulationMode;
-	}
+
+/**
+ * @return Demodulation Mode (DEMODULATION_OFF, *_AM, *_NFM, *_WFM, ...)
+ */
+public int getDemodulationMode() {
+	return demodulationMode;
+}
 
 public static boolean supportsSampleRate(int mode, int sampleRate) {
 	if (sampleRate % QUADRATURE_RATE[mode] != 0) return false;
@@ -155,111 +155,111 @@ public boolean setChannelWidth(int channelWidth) {
 	return true;
 }
 
-	/**
-	 * @return Current width (cut-off frequency - one sided) of the user filter
-	 */
-	public int getChannelWidth() {
-		return userFilterCutOff;
-	}
+/**
+ * @return Current width (cut-off frequency - one sided) of the user filter
+ */
+public int getChannelWidth() {
+	return userFilterCutOff;
+}
 
-	/**
-	 * Starts the thread. This thread will start 2 more threads for decimation and audio output.
-	 * These threads are managed by the Demodulator and terminated, when the Demodulator thread
-	 * terminates.
-	 */
-	@Override
-	public synchronized void start() {
-		stopRequested = false;
-		super.start();
-	}
+/**
+ * Starts the thread. This thread will start 2 more threads for decimation and audio output.
+ * These threads are managed by the Demodulator and terminated, when the Demodulator thread
+ * terminates.
+ */
+@Override
+public synchronized void start() {
+	stopRequested = false;
+	super.start();
+}
 
-	/**
-	 * Stops the thread
-	 */
-	public void stopDemodulator() {
-		stopRequested = true;
-	}
+/**
+ * Stops the thread
+ */
+public void stopDemodulator() {
+	stopRequested = true;
+}
 
-	@Override
-	public void run() {
-		SamplePacket inputSamples = null;
-		SamplePacket audioBuffer = null;
+@Override
+public void run() {
+	SamplePacket inputSamples = null;
+	SamplePacket audioBuffer = null;
 
-		Log.i(LOGTAG, "Demodulator started. (Thread: " + this.getName() + ")");
+	Log.i(LOGTAG, "Demodulator started. (Thread: " + this.getName() + ")");
 
-		// Start the audio sink thread:
-		audioSink.start();
+	// Start the audio sink thread:
+	audioSink.start();
 
-		// Start decimator thread:
-		decimator.start();
+	// Start decimator thread:
+	decimator.start();
 
-		while (!stopRequested) {
+	while (!stopRequested) {
 
-			// Get downsampled packet from the decimator:
-			inputSamples = decimator.getDecimatedPacket(1000);
+		// Get downsampled packet from the decimator:
+		inputSamples = decimator.getDecimatedPacket(1000);
 
-			// Verify the input sample packet is not null:
-			if (inputSamples == null) {
-				//Log.d(LOGTAG, "run: Decimated sample is null. skip this round...");
-				continue;
-			}
-
-			// filtering		[sample rate is QUADRATURE_RATE]
-			applyUserFilter(inputSamples, quadratureSamples);        // The result from filtering is stored in quadratureSamples
-
-			// return input samples to the decimator block:
-			decimator.returnDecimatedPacket(inputSamples);
-
-			// get buffer from audio sink
-			audioBuffer = audioSink.getPacketBuffer(1000);
-
-			if(audioBuffer == null) {
-				Log.d(LOGTAG, "run: Audio buffer is null. skip this round...");
-				continue;
-			}
-
-			// demodulate		[sample rate is QUADRATURE_RATE]
-			switch (demodulationMode) {
-				case DEMODULATION_OFF:
-					break;
-
-				case DEMODULATION_AM:
-					demodulateAM(quadratureSamples, audioBuffer);
-					break;
-
-				case DEMODULATION_NFM:
-					demodulateFM(quadratureSamples, audioBuffer, 5000);
-					break;
-
-				case DEMODULATION_WFM:
-					demodulateFM(quadratureSamples, audioBuffer, 75000);
-					break;
-
-				case DEMODULATION_LSB:
-					demodulateSSB(quadratureSamples, audioBuffer, false);
-					break;
-
-				case DEMODULATION_USB:
-					demodulateSSB(quadratureSamples, audioBuffer, true);
-					break;
-
-				default:
-					Log.e(LOGTAG, "run: invalid demodulationMode: " + demodulationMode);
-			}
-
-			// play audio		[sample rate is QUADRATURE_RATE]
-			audioSink.enqueuePacket(audioBuffer);
+		// Verify the input sample packet is not null:
+		if (inputSamples == null) {
+			//Log.d(LOGTAG, "run: Decimated sample is null. skip this round...");
+			continue;
 		}
 
-		// Stop the audio sink thread:
-		audioSink.stopSink();
+		// filtering		[sample rate is QUADRATURE_RATE]
+		applyUserFilter(inputSamples, quadratureSamples);        // The result from filtering is stored in quadratureSamples
 
-		// Stop the decimator thread:
-		decimator.stopDecimator();
+		// return input samples to the decimator block:
+		decimator.returnDecimatedPacket(inputSamples);
 
-		this.stopRequested = true;
-		Log.i(LOGTAG, "Demodulator stopped. (Thread: " + this.getName() + ")");
+		// get buffer from audio sink
+		audioBuffer = audioSink.getPacketBuffer(1000);
+
+		if (audioBuffer == null) {
+			Log.d(LOGTAG, "run: Audio buffer is null. skip this round...");
+			continue;
+		}
+
+		// demodulate		[sample rate is QUADRATURE_RATE]
+		switch (demodulationMode) {
+			case DEMODULATION_OFF:
+				break;
+
+			case DEMODULATION_AM:
+				demodulateAM(quadratureSamples, audioBuffer);
+				break;
+
+			case DEMODULATION_NFM:
+				demodulateFM(quadratureSamples, audioBuffer, 5000);
+				break;
+
+			case DEMODULATION_WFM:
+				demodulateFM(quadratureSamples, audioBuffer, 75000);
+				break;
+
+			case DEMODULATION_LSB:
+				demodulateSSB(quadratureSamples, audioBuffer, false);
+				break;
+
+			case DEMODULATION_USB:
+				demodulateSSB(quadratureSamples, audioBuffer, true);
+				break;
+
+			default:
+				Log.e(LOGTAG, "run: invalid demodulationMode: " + demodulationMode);
+		}
+
+		// play audio		[sample rate is QUADRATURE_RATE]
+		audioSink.enqueuePacket(audioBuffer);
 	}
+
+	// Stop the audio sink thread:
+	audioSink.stopSink();
+
+	// Stop the decimator thread:
+	decimator.stopDecimator();
+
+	this.stopRequested = true;
+	Log.i(LOGTAG, "Demodulator stopped. (Thread: " + this.getName() + ")");
+}
 
 /**
  * Will filter the samples in input according to the user filter settings.
@@ -285,7 +285,6 @@ private void applyUserFilter(SamplePacket input, SamplePacket output) {
 		Log.d(LOGTAG, "applyUserFilter: created new user filter with " + userFilter.getNumberOfTaps()
 		              + " taps. Decimation=" + userFilter.getDecimation() + " High Cut-Off=" + userFilter.getHighCutOffFrequency()
 		              + " transition=" + userFilter.getTransitionWidth());
-
 	}
 	output.setSize(0);    // mark buffer as empty
 	final int inputSize = input.size();
@@ -293,6 +292,7 @@ private void applyUserFilter(SamplePacket input, SamplePacket output) {
 		Log.e(LOGTAG, "applyUserFilter: could not filter all samples from input packet.");
 	}
 }
+
 
 /**
  * Will FM demodulate the samples in input. Use ~75000 deviation for wide band FM
@@ -404,7 +404,6 @@ private void demodulateAM(SamplePacket input, SamplePacket output) {
 	if (bandPassFilter.filter(input, output, 0, inputSize) < inputSize) {
 		Log.e(LOGTAG, "demodulateSSB: could not filter all samples from input packet.");
 	}
-
 	// todo: make separate AGC block
 	// gain control: searching for max:
 	lastMax *= 0.95;    // simplest AGC
