@@ -169,7 +169,7 @@ public class FilterBenchmark extends ApplicationTestCase<Application> {
 				filter.getClass().getSimpleName(), filter.getTapsCount(), filter.getDecimation());
 	}
 
-	private void _benchmarkFilter(float sampleRate, int packetSize, int loopCycles, Packet in, Packet out, FIR winFilter) {
+	private void benchmarkFilter(float sampleRate, int packetSize, int loopCycles, Packet in, Packet out, FIR winFilter) {
 		//Debug.startMethodTracing("FirFilter");
 		//System.out.println("##### WARMUP ...");
 		for (int i = 0; i < loopCycles / 4; i++) {
