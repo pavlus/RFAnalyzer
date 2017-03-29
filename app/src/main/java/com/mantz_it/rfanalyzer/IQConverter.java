@@ -86,7 +86,7 @@ public abstract int fillPacketIntoSamplePacket(byte[] packet, SamplePacket sampl
 
 @Deprecated
 public int fillPacketIntoSamplePacket(byte[] packet, SamplePacket samplePacket) {
-	return fillPacketIntoSamplePacket(packet, samplePacket, -1);
+	return fillPacketIntoSamplePacket(packet, samplePacket, 0);
 }
 
 @Deprecated
