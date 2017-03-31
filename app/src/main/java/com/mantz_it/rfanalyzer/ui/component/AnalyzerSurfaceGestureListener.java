@@ -91,6 +91,7 @@ private static final String LOGTAG = "AnalyzerGestures";
 						analyzerSurface.virtualFrequency += virtualFrequencyOffset;
 						analyzerSurface.channelFrequency += virtualFrequencyOffset;
 						analyzerSurface.callbackHandler.updateChannelFrequency(analyzerSurface.channelFrequency);
+
 					}
 					break;
 				case AnalyzerSurface.SCROLLTYPE_CHANNEL_FREQUENCY:

@@ -556,6 +556,7 @@ public void setDemodulationEnabled(boolean demodulationEnabled) {
 				AnalyzerSurface.this.squelch = minDB + (maxDB - minDB) / 4;
 			}
 			callbackHandler.updateSquelchSatisfied(squelchSatisfied);    // just to make sure the scheduler is still in sync with the gui
+
 		}
 		AnalyzerSurface.this.demodulationEnabled = demodulationEnabled;
 	}
@@ -792,6 +793,7 @@ public void draw(float[] mag, long frequency, int sampleRate, int frameRate, dou
 				squelchSatisfied = false;
 				AnalyzerSurface.this.squelchPaint.setColor(Color.RED);
 				callbackHandler.updateSquelchSatisfied(squelchSatisfied);
+
 			}
 			// else the squelchSatisfied flag is still valid. no actions needed...
 		}
