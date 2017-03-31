@@ -10,7 +10,7 @@ import com.mantz_it.rfanalyzer.control.Control;
  * Created by Pavel on 21.03.2017.
  */
 
-public class HackrfBasebandFilterControl implements Control {
+class HackrfBasebandFilterControl implements Control {
 private static final String LOGTAG = "[HackRF]:BasebandFilter";
 private int basebandFilterWidth = 0;
 private boolean automaticBBFilterCalculation = true;
