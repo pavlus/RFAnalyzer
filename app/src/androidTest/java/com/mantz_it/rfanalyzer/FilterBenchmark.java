@@ -3,6 +3,7 @@ package com.mantz_it.rfanalyzer;
 import android.app.Application;
 import android.os.SystemClock;
 import android.test.ApplicationTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
 
 import com.mantz_it.rfanalyzer.dsp.ConvergenceException;
 import com.mantz_it.rfanalyzer.dsp.FilterBuilder;
@@ -18,7 +19,7 @@ import com.mantz_it.rfanalyzer.dsp.spi.Window;
 /**
  * Created by Pavel on 15.12.2016.
  */
-
+@LargeTest
 public class FilterBenchmark extends ApplicationTestCase<Application> {
 	public FilterBenchmark() {
 		super(Application.class);
@@ -67,6 +68,7 @@ public class FilterBenchmark extends ApplicationTestCase<Application> {
 	public void _testFilters() {
 		final int samplesCnt = Packet.PREFERRED_SIZE / 2;
 		final int decimation = 2;
+		@SuppressWarnings("MismatchedReadAndWriteOfArray")
 		float[] interleavedSamples = new float[samplesCnt << 1];
 		//Util.noise(interleavedSamples);
 		PacketPool pool = PacketPool.getArrayPacketPool();

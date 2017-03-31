@@ -17,6 +17,8 @@ import android.preference.SwitchPreference;
 import android.provider.MediaStore;
 import android.widget.Toast;
 
+import com.mantz_it.rfanalyzer.util.FileUtils;
+
 import java.io.File;
 
 /**
@@ -308,16 +310,23 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 	 * @param orientation auto, landscape, portrait, reverse_landscape or reverse_portrait
 	 */
 	public void setScreenOrientation(String orientation) {
-		if (orientation.equals("auto"))
-			getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-		else if (orientation.equals("landscape"))
-			getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-		else if (orientation.equals("portrait"))
-			getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		else if (orientation.equals("reverse_landscape"))
-			getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-		else if (orientation.equals("reverse_portrait"))
-			getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+		switch (orientation) {
+			case "auto":
+				getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+				break;
+			case "landscape":
+				getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+				break;
+			case "portrait":
+				getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+				break;
+			case "reverse_landscape":
+				getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+				break;
+			case "reverse_portrait":
+				getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+				break;
+		}
 	}
 
 	/**

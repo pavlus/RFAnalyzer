@@ -1,9 +1,11 @@
 package com.mantz_it.rfanalyzer.device.hiqsdr;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.mantz_it.rfanalyzer.IQConverter;
 import com.mantz_it.rfanalyzer.IQSource;
@@ -140,12 +142,12 @@ protected HiqsdrSource() {
 
 	rxFrequencyControl = //MethodInterceptor.wrapWithLog(
 			new HiqsdrRXFrequency(this, mixerFrequency);
-			//"HiqsdrRXFreq",
-			//RXFrequency.class);
+	//"HiqsdrRXFreq",
+	//RXFrequency.class);
 	rxSampleRateControl = //MethodInterceptor.wrapWithLog(
 			new HiqsdrRXSampleRate(this, mixerSampleRate);
-			//"HiqsdrRXSampleRate",
-			//RXSampleRate.class);
+	//"HiqsdrRXSampleRate",
+	//RXSampleRate.class);
 
 	controls.put(RXFrequency.class, rxFrequencyControl);
 	controls.put(RXSampleRate.class, rxSampleRateControl);
@@ -194,6 +196,12 @@ public boolean open(Context context, Callback callback) {
 	workerThread.setPriority(Thread.MAX_PRIORITY);
 	workerThread.start();
 	return true;
+}
+
+@Override
+public void showGainDialog(Activity activity, SharedPreferences preferences) {
+	Toast.makeText(activity, "HiQSDR gain setting is not supported yet", Toast.LENGTH_LONG).show();
+	Log.e(LOGTAG, "adjustGain: implement source type HIQSDR_SOURCE");
 }
 
 @Override

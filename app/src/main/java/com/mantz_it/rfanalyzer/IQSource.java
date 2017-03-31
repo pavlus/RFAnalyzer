@@ -1,5 +1,6 @@
 package com.mantz_it.rfanalyzer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -47,6 +48,8 @@ public interface IQSource extends Controllable {
  * @return false if an error occurred.
  */
 boolean open(Context context, Callback callback);
+
+void showGainDialog(Activity activity, SharedPreferences preferences);
 
 /**
  * Will return true if the source is opened and ready to use

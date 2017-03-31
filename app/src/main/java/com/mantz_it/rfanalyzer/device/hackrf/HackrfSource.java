@@ -1,8 +1,15 @@
 package com.mantz_it.rfanalyzer.device.hackrf;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.view.WindowManager;
+import android.widget.LinearLayout;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.mantz_it.hackrf_android.Hackrf;
 import com.mantz_it.hackrf_android.HackrfCallbackInterface;
@@ -135,6 +142,84 @@ public boolean open(Context context, Callback callback) {
 	this.callback = callback;
 	// Initialize the HackRF (i.e. open the USB device, which requires the user to give permissions)
 	return Hackrf.initHackrf(context, this, queueSize);
+}
+
+@Override
+public void showGainDialog(final Activity activity, final SharedPreferences preferences) {
+	final LinearLayout view_hackrf = (LinearLayout) activity.getLayoutInflater().inflate(R.layout.hackrf_gain, null);
+	final SeekBar sb_hackrf_vga = (SeekBar) view_hackrf.findViewById(R.id.sb_hackrf_vga_gain);
+	final SeekBar sb_hackrf_lna = (SeekBar) view_hackrf.findViewById(R.id.sb_hackrf_lna_gain);
+	final TextView tv_hackrf_vga = (TextView) view_hackrf.findViewById(R.id.tv_hackrf_vga_gain);
+	final TextView tv_hackrf_lna = (TextView) view_hackrf.findViewById(R.id.tv_hackrf_lna_gain);
+	sb_hackrf_vga.setMax(HackrfSource.MAX_VGA_RX_GAIN / HackrfSource.VGA_RX_GAIN_STEP_SIZE);
+	sb_hackrf_lna.setMax(HackrfSource.MAX_LNA_GAIN / HackrfSource.LNA_GAIN_STEP_SIZE);
+	sb_hackrf_vga.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+		@Override
+		public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+			tv_hackrf_vga.setText(Integer.toString(progress * HackrfSource.VGA_RX_GAIN_STEP_SIZE));
+			setVgaRxGain(progress * HackrfSource.VGA_RX_GAIN_STEP_SIZE);
+		}
+
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar) {
+		}
+
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar) {
+		}
+	});
+	sb_hackrf_lna.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+		@Override
+		public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+			tv_hackrf_lna.setText(Integer.toString(progress * HackrfSource.LNA_GAIN_STEP_SIZE));
+			setLnaGain(progress * HackrfSource.LNA_GAIN_STEP_SIZE);
+		}
+
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar) {
+		}
+
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar) {
+		}
+	});
+	sb_hackrf_vga.setProgress(getVgaRxGain() / HackrfSource.VGA_RX_GAIN_STEP_SIZE);
+	sb_hackrf_lna.setProgress(getLnaGain() / HackrfSource.LNA_GAIN_STEP_SIZE);
+
+	// Show dialog:
+	AlertDialog hackrfDialog = new AlertDialog.Builder(activity)
+			.setTitle("Adjust Gain Settings")
+			.setView(view_hackrf)
+			.setPositiveButton("Set", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					// safe preferences:
+					SharedPreferences.Editor edit = preferences.edit();
+					edit.putInt(activity.getString(R.string.pref_hackrf_vgaRxGain), sb_hackrf_vga.getProgress() * HackrfSource.VGA_RX_GAIN_STEP_SIZE);
+					edit.putInt(activity.getString(R.string.pref_hackrf_lnaGain), sb_hackrf_lna.getProgress() * HackrfSource.LNA_GAIN_STEP_SIZE);
+					edit.apply();
+				}
+			})
+			.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					// do nothing
+				}
+			})
+			.create();
+	hackrfDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+		@Override
+		public void onDismiss(DialogInterface dialog) {
+			// sync source with (new/old) settings
+			int vgaRxGain = preferences.getInt(activity.getString(R.string.pref_hackrf_vgaRxGain), HackrfSource.MAX_VGA_RX_GAIN / 2);
+			int lnaGain = preferences.getInt(activity.getString(R.string.pref_hackrf_lnaGain), HackrfSource.MAX_LNA_GAIN / 2);
+			if (getVgaRxGain() != vgaRxGain)
+				setVgaRxGain(vgaRxGain);
+			if (getLnaGain() != lnaGain)
+				setLnaGain(lnaGain);
+		}
+	});
+	hackrfDialog.show();
+	hackrfDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
 }
 
 @Override

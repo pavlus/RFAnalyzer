@@ -1,9 +1,11 @@
 package com.mantz_it.rfanalyzer.device.file;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.mantz_it.rfanalyzer.IQConverter;
 import com.mantz_it.rfanalyzer.IQSource;
@@ -179,6 +181,11 @@ public boolean open(Context context, Callback callback) {
 		reportError("Error while opening file: " + e.getMessage());
 		return false;
 	}
+}
+
+@Override
+public void showGainDialog(Activity activity, SharedPreferences preferences) {
+	Toast.makeText(activity, activity.getString(R.string.filesource_doesnt_support_gain), Toast.LENGTH_LONG).show();
 }
 
 @Override

@@ -36,6 +36,7 @@ public class FFT_Tests {
 			interleaved[i * 2] = (float) Math.cos(2 * Math.PI * i / n);
 		}
 		Arrays.fill(golden, 0);
+		//noinspection PointlessArithmeticExpression
 		golden[1 * 2] = n / 2;
 		golden[(n - 1) * 2] = n / 2;
 		Util.testFFT(fft, interleaved, golden, delta);
