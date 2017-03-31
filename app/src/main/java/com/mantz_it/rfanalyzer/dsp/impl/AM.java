@@ -8,7 +8,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.FloatBuffer;
 
 /**
- * Created by pavlus on 14.01.17.
+ * Created by Pavel Remygailo on 14.01.17.
  */
 public class AM extends Demodulation {
     @Override
