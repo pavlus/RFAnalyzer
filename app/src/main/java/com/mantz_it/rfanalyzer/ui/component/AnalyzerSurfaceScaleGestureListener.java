@@ -36,11 +36,11 @@ public boolean onScale(ScaleGestureDetector detector) {
 			// if we zoomed the channel selector out of the window, reset the channel selector:
 			if (analyzerSurface.demodulationEnabled && analyzerSurface.channelFrequency < analyzerSurface.virtualFrequency - analyzerSurface.virtualSampleRate / 2) {
 				analyzerSurface.channelFrequency = analyzerSurface.virtualFrequency - analyzerSurface.virtualSampleRate / 2;
-				analyzerSurface.callbackHandler.onUpdateChannelFrequency(analyzerSurface.channelFrequency);
+				analyzerSurface.callbackHandler.updateChannelFrequency(analyzerSurface.channelFrequency);
 			}
 			if (analyzerSurface.demodulationEnabled && analyzerSurface.channelFrequency > analyzerSurface.virtualFrequency + analyzerSurface.virtualSampleRate / 2) {
 				analyzerSurface.channelFrequency = analyzerSurface.virtualFrequency + analyzerSurface.virtualSampleRate / 2;
-				analyzerSurface.callbackHandler.onUpdateChannelFrequency(analyzerSurface.channelFrequency);
+				analyzerSurface.callbackHandler.updateChannelFrequency(analyzerSurface.channelFrequency);
 			}
 			Log.d(LOGTAG, "onScale: virtualFrequency=" + analyzerSurface.virtualFrequency
 			              + ", virtualSampleRate=" + analyzerSurface.virtualSampleRate

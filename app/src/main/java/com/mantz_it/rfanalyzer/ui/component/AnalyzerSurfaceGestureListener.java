@@ -69,7 +69,7 @@ private static final String LOGTAG = "AnalyzerGestures";
 		if (analyzerSurface.demodulationEnabled) {
 			float hzPerPx = analyzerSurface.virtualSampleRate / (float) analyzerSurface.width;
 			analyzerSurface.channelFrequency = analyzerSurface.virtualFrequency - analyzerSurface.virtualSampleRate / 2 + (long) (hzPerPx * e.getX());
-			analyzerSurface.callbackHandler.onUpdateChannelFrequency(analyzerSurface.channelFrequency);
+			analyzerSurface.callbackHandler.updateChannelFrequency(analyzerSurface.channelFrequency);
 		}
 		return true;
 	}
@@ -84,25 +84,25 @@ private static final String LOGTAG = "AnalyzerGestures";
 				case AnalyzerSurface.SCROLLTYPE_NORMAL:
 					// Scroll horizontal if touch point in the main area or always if decoupled axis is deactivated:
 					if (!analyzerSurface.decoupledAxis || e1.getX() > analyzerSurface.getGridSize() * 1.5 || e1.getY() > analyzerSurface.getFftHeight() - analyzerSurface.getGridSize()) {
-						long minFrequencyShift = Math.max(analyzerSurface.virtualFrequency * -1 + 1,
+						long minFrequencyOffset = Math.max(analyzerSurface.virtualFrequency * -1 + 1,
 								analyzerSurface.getRxFrequency().getMin() - analyzerSurface.getRxSampleRate().get() / 2 - analyzerSurface.virtualFrequency);
-						long maxFrequencyShift = analyzerSurface.getRxFrequency().getMax() + analyzerSurface.getRxSampleRate().get() / 2 - analyzerSurface.virtualFrequency;
-						long virtualFrequencyShift = Math.min(Math.max((long) (hzPerPx * distanceX), minFrequencyShift), maxFrequencyShift);
-						analyzerSurface.virtualFrequency += virtualFrequencyShift;
-						analyzerSurface.channelFrequency += virtualFrequencyShift;
-						analyzerSurface.callbackHandler.onUpdateChannelFrequency(analyzerSurface.channelFrequency);
+						long maxFrequencyOffset = analyzerSurface.getRxFrequency().getMax() + analyzerSurface.getRxSampleRate().get() / 2 - analyzerSurface.virtualFrequency;
+						long virtualFrequencyOffset = Math.min(Math.max((long) (hzPerPx * distanceX), minFrequencyOffset), maxFrequencyOffset);
+						analyzerSurface.virtualFrequency += virtualFrequencyOffset;
+						analyzerSurface.channelFrequency += virtualFrequencyOffset;
+						analyzerSurface.callbackHandler.updateChannelFrequency(analyzerSurface.channelFrequency);
 					}
 					break;
 				case AnalyzerSurface.SCROLLTYPE_CHANNEL_FREQUENCY:
 					analyzerSurface.channelFrequency -= distanceX * hzPerPx;
-					analyzerSurface.callbackHandler.onUpdateChannelFrequency(analyzerSurface.channelFrequency);
+					analyzerSurface.callbackHandler.updateChannelFrequency(analyzerSurface.channelFrequency);
 					break;
 				case AnalyzerSurface.SCROLLTYPE_CHANNEL_WIDTH_LEFT:
 				case AnalyzerSurface.SCROLLTYPE_CHANNEL_WIDTH_RIGHT:
 					int tmpChannelWidth = analyzerSurface.scrollType == AnalyzerSurface.SCROLLTYPE_CHANNEL_WIDTH_LEFT
 							? (int) (analyzerSurface.channelWidth + distanceX * hzPerPx)
 							: (int) (analyzerSurface.channelWidth - distanceX * hzPerPx);
-					if (analyzerSurface.callbackHandler.onUpdateChannelWidth(tmpChannelWidth))
+					if (analyzerSurface.callbackHandler.updateChannelWidth(tmpChannelWidth))
 						analyzerSurface.channelWidth = tmpChannelWidth;
 					break;
 				case AnalyzerSurface.SCROLLTYPE_SQUELCH:

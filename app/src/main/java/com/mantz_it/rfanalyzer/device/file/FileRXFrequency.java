@@ -34,12 +34,12 @@ class FileRXFrequency implements RXFrequency {
 	}
 
 @Override
-public int getFrequencyShift() {
+public int getFrequencyOffset() {
 	return 0;
 }
 
 @Override
-public void setFrequencyShift(int frequencyShift) {
+public void setFrequencyOffset(int frequencyOffset) {
 	throw new UnsupportedOperationException();
 }
 }

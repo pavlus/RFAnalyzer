@@ -10,7 +10,7 @@ import com.mantz_it.rfanalyzer.sdr.controls.RXFrequency;
  */
 class HiqsdrRXFrequency implements RXFrequency {
 private static final String LOGTAG = "[HiQSDR]: RXFrequency";
-// fixme: this frequencyShift is quite a mess, analyze and test it
+// fixme: this frequencyOffset is quite a mess, analyze and test it
 private HiqsdrSource hiqsdrSource;
 private MixerFrequency mixerFrequency;
 
@@ -43,12 +43,12 @@ public Long getMin() {
 }
 
 @Override
-public int getFrequencyShift() {
+public int getFrequencyOffset() {
 	return 0;
 }
 
 @Override
-public void setFrequencyShift(int frequencyShift) {
+public void setFrequencyOffset(int frequencyOffset) {
 	throw new UnsupportedOperationException();
 }
 }

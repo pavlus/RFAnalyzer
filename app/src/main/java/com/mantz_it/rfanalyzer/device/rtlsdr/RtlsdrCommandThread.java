@@ -183,7 +183,7 @@ private boolean connect(int timeoutMillis) {
 		// Update source name with the new information:
 		rtlsdrSource.setName("RTL-SDR (" + rtlsdrSource.getTuner() + ") at " + ipAddress + ":" + port);
 
-		mixerFrequency.set(rxFrequency.get() + rxFrequency.getFrequencyShift());
+		mixerFrequency.set(rxFrequency.get() + rxFrequency.getFrequencyOffset());
 
 		if (manualGain.size() > 0)
 			manualGain.setByIndex(0);

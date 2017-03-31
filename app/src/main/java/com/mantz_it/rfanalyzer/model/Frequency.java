@@ -12,7 +12,7 @@ import com.mantz_it.rfanalyzer.control.Controllable;
  */
 
 public interface Frequency extends ConstrainedProperty<Long> {
-int getFrequencyShift();
+int getFrequencyOffset();
 
-void setFrequencyShift(int frequencyShift);
+void setFrequencyOffset(int frequencyOffset);
 }

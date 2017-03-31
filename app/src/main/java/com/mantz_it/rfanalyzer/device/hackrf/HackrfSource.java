@@ -120,8 +120,8 @@ public HackrfSource(Context context, SharedPreferences preferences) {
 	setLnaGain(preferences.getInt(context.getString(R.string.pref_hackrf_lnaGain), HackrfSource.MAX_LNA_GAIN / 2));
 	setAmplifier(preferences.getBoolean(context.getString(R.string.pref_hackrf_amplifier), false));
 	setAntennaPower(preferences.getBoolean(context.getString(R.string.pref_hackrf_antennaPower), false));
-	rxFrequency.setFrequencyShift(Integer.parseInt(
-			preferences.getString(context.getString(R.string.pref_hackrf_frequencyShift), "0")));
+	rxFrequency.setFrequencyOffset(Integer.parseInt(
+			preferences.getString(context.getString(R.string.pref_hackrf_frequencyOffset), "0")));
 }
 
 /**
@@ -272,13 +272,13 @@ public String getName() {
 public HackrfSource updatePreferences(Context context, SharedPreferences preferences) {
 	boolean amp = preferences.getBoolean(context.getString(R.string.pref_hackrf_amplifier), false);
 	boolean antennaPower = preferences.getBoolean(context.getString(R.string.pref_hackrf_antennaPower), false);
-	int frequencyShift = Integer.parseInt(preferences.getString(context.getString(R.string.pref_hackrf_frequencyShift), "0"));
+	int frequencyOffset = Integer.parseInt(preferences.getString(context.getString(R.string.pref_hackrf_frequencyOffset), "0"));
 	if (isAmplifierOn() != amp)
 		setAmplifier(amp);
 	if (isAntennaPowerOn() != antennaPower)
 		setAntennaPower(antennaPower);
-	if (rxFrequency.getFrequencyShift() != frequencyShift)
-		rxFrequency.setFrequencyShift(frequencyShift);
+	if (rxFrequency.getFrequencyOffset() != frequencyOffset)
+		rxFrequency.setFrequencyOffset(frequencyOffset);
 	return this;
 }
 

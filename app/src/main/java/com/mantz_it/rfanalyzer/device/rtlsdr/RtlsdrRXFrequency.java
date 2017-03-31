@@ -11,7 +11,7 @@ import com.mantz_it.rfanalyzer.sdr.controls.RXFrequency;
 class RtlsdrRXFrequency implements RXFrequency {
 private static final String LOGTAG = "[RTL-SDR]:RXFrequency";
 private long frequency = 0;
-private int frequencyShift = 0;    // virtually shift the frequency according to an external up/down-converter
+private int frequencyOffset = 0;    // virtually shift the frequency according to an external up/down-converter
 
 private RtlsdrSource rtlsdrSource;
 private MixerFrequency mixerFrequency;
@@ -23,16 +23,16 @@ RtlsdrRXFrequency(RtlsdrSource rtlsdrSource, MixerFrequency mixerFrequency) {
 
 @Override
 public Long get() {
-	return frequency + frequencyShift;
+	return frequency + frequencyOffset;
 }
 
 @Override
 public void set(Long to) {
-	long actualSourceFrequency = to - frequencyShift;
+	long actualSourceFrequency = to - frequencyOffset;
 	if (rtlsdrSource.isOpen()) {
 		if (to < getMin() || to > getMax()) {
 			Log.w(LOGTAG, "setFrequency: Frequency out of valid range: " + to
-			              + "  (upconverterFrequency=" + frequencyShift + " is subtracted!)");
+			              + "  (upconverterFrequency=" + frequencyOffset + " is subtracted!)");
 		}
 		if (to < getMin())
 			to = getMin();
@@ -50,23 +50,23 @@ public void set(Long to) {
 
 @Override
 public Long getMax() {
-	return rtlsdrSource.getTuner().maxFrequency + frequencyShift;
+	return rtlsdrSource.getTuner().maxFrequency + frequencyOffset;
 }
 
 @Override
 public Long getMin() {
-	return rtlsdrSource.getTuner().minFrequency + frequencyShift;
+	return rtlsdrSource.getTuner().minFrequency + frequencyOffset;
 }
 
 @Override
-public int getFrequencyShift() {
-	return frequencyShift;
+public int getFrequencyOffset() {
+	return frequencyOffset;
 }
 
 @Override
-public void setFrequencyShift(int frequencyShift) {
-	this.frequencyShift = frequencyShift;
-	mixerFrequency.set(frequency + frequencyShift);
+public void setFrequencyOffset(int frequencyOffset) {
+	this.frequencyOffset = frequencyOffset;
+	mixerFrequency.set(frequency + frequencyOffset);
 }
 
 

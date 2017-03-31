@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.mantz_it.rfanalyzer.R;
 import com.mantz_it.rfanalyzer.SettingsFragment;
 
 /**

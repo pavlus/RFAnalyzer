@@ -122,9 +122,6 @@
     <string name="pref_rtlsdr_frequencyCorrection_title">Frequency correction (ppm)</string>
     <string name="pref_rtlsdr_frequencyCorrection_summ">Frequency correction is set to: %s ppm</string>
     <string name="pref_rtlsdr_frequencyCorrection_default">0</string>
-    <string name="pref_rtlsdr_frequencyShift">pref_rtlsdr_frequencyShift</string>
-    <string name="pref_rtlsdr_frequencyShift_title">Up-/Down-converter frequency shift (Hz)</string>
-    <string name="pref_rtlsdr_frequencyShift_summ">Shown frequencies are shifted by: %s Hz</string>
     <string name="pref_hiqsdr_category">pref_hiqsdr_category</string>
     <string name="pref_hiqsdr_category_title">HiQSDR Settings</string>
     <string name="pref_hiqsdr_rx_frequency">pref_hiqsdr_rx_frequency</string>

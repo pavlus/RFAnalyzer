@@ -17,6 +17,7 @@ import android.view.SurfaceView;
 
 import com.mantz_it.rfanalyzer.IQSource;
 import com.mantz_it.rfanalyzer.R;
+import com.mantz_it.rfanalyzer.RFControlInterface;
 import com.mantz_it.rfanalyzer.device.hackrf.HackrfSource;
 import com.mantz_it.rfanalyzer.device.rtlsdr.RtlsdrSource;
 import com.mantz_it.rfanalyzer.sdr.controls.FrequencyCorrectionControl;
@@ -61,7 +62,7 @@ IQSource getSource() { return source;}
 
 
 private IQSource source = null;            // Reference to the IQ source for tuning and retrieving properties
-AnalyzerSurfaceListener callbackHandler = null;    // Reference to a callback handler
+RFControlInterface callbackHandler = null;    // Reference to a callback handler
 
 private Paint defaultPaint = null;        // Paint object to draw bitmaps on the canvas
 private Paint blackPaint = null;        // Paint object to draw black (erase)
@@ -173,7 +174,7 @@ boolean showDebugInformation = false;
  */
 private Context context;
 
-public AnalyzerSurface(Context context, AnalyzerSurfaceListener callbackHandler) {
+public AnalyzerSurface(Context context, RFControlInterface callbackHandler) {
 	super(context);
 	this.context = context;
 	this.callbackHandler = callbackHandler;
@@ -547,14 +548,14 @@ public void setDemodulationEnabled(boolean demodulationEnabled) {
 			// initialize channel freq, width and squelch if they are out of range:
 			if (channelFrequency < virtualFrequency - virtualSampleRate / 2 || channelFrequency > virtualFrequency + virtualSampleRate / 2) {
 				AnalyzerSurface.this.channelFrequency = virtualFrequency;
-				callbackHandler.onUpdateChannelFrequency(channelFrequency);
+				callbackHandler.updateChannelFrequency(channelFrequency);
 			}
-			if (!callbackHandler.onUpdateChannelWidth(channelWidth))    // try setting the channel width
-				AnalyzerSurface.this.channelWidth = callbackHandler.onCurrentChannelWidthRequested();    // width was not supported; inherit from demodulator
+			if (!callbackHandler.updateChannelWidth(channelWidth))    // try setting the channel width
+				AnalyzerSurface.this.channelWidth = callbackHandler.requestCurrentChannelWidth();    // width was not supported; inherit from demodulator
 			if (squelch < minDB || squelch > maxDB) {
 				AnalyzerSurface.this.squelch = minDB + (maxDB - minDB) / 4;
 			}
-			callbackHandler.onUpdateSquelchSatisfied(squelchSatisfied);    // just to make sure the scheduler is still in sync with the gui
+			callbackHandler.updateSquelchSatisfied(squelchSatisfied);    // just to make sure the scheduler is still in sync with the gui
 		}
 		AnalyzerSurface.this.demodulationEnabled = demodulationEnabled;
 	}
@@ -786,11 +787,11 @@ public void draw(float[] mag, long frequency, int sampleRate, int frameRate, dou
 			if (!squelchSatisfied && averageSignalStrengh >= squelch) {
 				squelchSatisfied = true;
 				AnalyzerSurface.this.squelchPaint.setColor(Color.GREEN);
-				callbackHandler.onUpdateSquelchSatisfied(squelchSatisfied);
+				callbackHandler.updateSquelchSatisfied(squelchSatisfied);
 			} else if (squelchSatisfied && averageSignalStrengh < squelch) {
 				squelchSatisfied = false;
 				AnalyzerSurface.this.squelchPaint.setColor(Color.RED);
-				callbackHandler.onUpdateSquelchSatisfied(squelchSatisfied);
+				callbackHandler.updateSquelchSatisfied(squelchSatisfied);
 			}
 			// else the squelchSatisfied flag is still valid. no actions needed...
 		}
@@ -1173,14 +1174,14 @@ private void drawPerformanceInfo(Canvas c, int frameRate, double load, float ave
 
 		// HackRF specific stuff:
 		if (source instanceof HackrfSource) {
-			text = String.format("shift=%4.6f MHz", rxFrequency.getFrequencyShift() / 1000000f);
+			text = String.format("offset=%4.6f MHz", rxFrequency.getFrequencyOffset() / 1000000f);
 			textSmallPaint.getTextBounds(text, 0, text.length(), bounds);
 			c.drawText(text, rightBorder - bounds.width(), yPos + bounds.height(), textSmallPaint);
 			yPos += bounds.height() * 1.1f;
 		}
 		// RTLSDR specific stuff:
 		if (source instanceof RtlsdrSource) {
-			text = String.format("shift=%4.6f MHz", rxFrequency.getFrequencyShift() / 1000000f);
+			text = String.format("offset=%4.6f MHz", rxFrequency.getFrequencyOffset() / 1000000f);
 			textSmallPaint.getTextBounds(text, 0, text.length(), bounds);
 			c.drawText(text, rightBorder - bounds.width(), yPos + bounds.height(), textSmallPaint);
 			yPos += bounds.height() * 1.1f;

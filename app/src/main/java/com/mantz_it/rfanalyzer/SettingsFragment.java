@@ -10,22 +10,22 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.preference.PreferenceManager;
 import android.widget.Toast;
 
 import com.mantz_it.rfanalyzer.util.FileUtils;
 
 import java.io.File;
 
-import static com.mantz_it.rfanalyzer.SettingsActivity.PERMISSION_REQUEST_LOGGING_WRITE_FILES;
+import static com.mantz_it.rfanalyzer.ui.activity.SettingsActivity.PERMISSION_REQUEST_LOGGING_WRITE_FILES;
 
 /**
  * <h1>RF Analyzer - Settings Fragment</h1>

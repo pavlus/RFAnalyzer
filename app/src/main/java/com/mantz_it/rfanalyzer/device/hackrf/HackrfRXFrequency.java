@@ -13,7 +13,7 @@ class HackrfRXFrequency implements com.mantz_it.rfanalyzer.sdr.controls.RXFreque
 private static final String LOGTAG = "[HackRF]:RXFrequency";
 
 private long frequency = 0;
-private int frequencyShift = 0;    // virtually shift the frequency according to an external up/down-converter
+private int frequencyOffset = 0;    // virtually shift the frequency according to an external up/down-converter
 
 private HackrfSource hackrfSource;
 private Hackrf device;
@@ -27,12 +27,12 @@ public HackrfRXFrequency(HackrfSource hackrfSource, MixerFrequency mixerFrequenc
 
 @Override
 public Long get() {
-	return this.frequency + this.frequencyShift;
+	return this.frequency + this.frequencyOffset;
 }
 
 @Override
 public void set(Long frequency) {
-	long actualFrequency = frequency - this.frequencyShift;
+	long actualFrequency = frequency - this.frequencyOffset;
 	// re-tune the hackrf:
 	if (device != null) {
 		try {
@@ -50,25 +50,25 @@ public void set(Long frequency) {
 
 	// Store the new frequency
 	frequency = actualFrequency;
-	mixerFrequency.set(frequency); // xxx: probably a bug here (+frequencyShift)
+	mixerFrequency.set(frequency); // xxx: probably a bug here (+frequencyOffset)
 }
 
 @Override
 public Long getMax() {
-	return HackrfSource.MAX_FREQUENCY + frequencyShift;
+	return HackrfSource.MAX_FREQUENCY + frequencyOffset;
 }
 
 @Override
 public Long getMin() {
-	return HackrfSource.MIN_FREQUENCY + frequencyShift;
+	return HackrfSource.MIN_FREQUENCY + frequencyOffset;
 }
 
-public int getFrequencyShift() {
-	return frequencyShift;
+public int getFrequencyOffset() {
+	return frequencyOffset;
 }
 
-public void setFrequencyShift(int frequencyShift) {
-	this.frequencyShift = frequencyShift;
-	this.mixerFrequency.set(frequency + frequencyShift);
+public void setFrequencyOffset(int frequencyOffset) {
+	this.frequencyOffset = frequencyOffset;
+	this.mixerFrequency.set(frequency + frequencyOffset);
 }
 }

@@ -194,8 +194,8 @@ public RtlsdrSource(Context context, SharedPreferences preferences) {
 
 	frequencyCorrectionControl.set(Integer.parseInt(
 			preferences.getString(context.getString(R.string.pref_rtlsdr_frequencyCorrection), "0")));
-	rxFrequency.setFrequencyShift(Integer.parseInt(
-			preferences.getString(context.getString(R.string.pref_rtlsdr_frequencyShift), "0")));
+	rxFrequency.setFrequencyOffset(Integer.parseInt(
+			preferences.getString(context.getString(R.string.pref_rtlsdr_frequencyOffset), "0")));
 	manualGainSwitch.set(preferences.getBoolean(context.getString(R.string.pref_rtlsdr_manual_gain), false));
 	automaticGainSwitch.set(preferences.getBoolean(context.getString(R.string.pref_rtlsdr_agc), false));
 	if (manualGainSwitch.get()) {
@@ -449,11 +449,11 @@ public RtlsdrSource updatePreferences(Context context, SharedPreferences prefere
 	}
 
 	int frequencyCorrection = Integer.parseInt(preferences.getString(context.getString(R.string.pref_rtlsdr_frequencyCorrection), "0"));
-	int frequencyShift = Integer.parseInt(preferences.getString(context.getString(R.string.pref_rtlsdr_frequencyShift), "0"));
+	int frequencyOffset = Integer.parseInt(preferences.getString(context.getString(R.string.pref_rtlsdr_frequencyOffset), "0"));
 	if (frequencyCorrection != frequencyCorrectionControl.get())
 		frequencyCorrectionControl.set(frequencyCorrection);
-	if (rxFrequency.getFrequencyShift() != frequencyShift)
-		rxFrequency.setFrequencyShift(frequencyShift);
+	if (rxFrequency.getFrequencyOffset() != frequencyOffset)
+		rxFrequency.setFrequencyOffset(frequencyOffset);
 	return this;
 }
 
