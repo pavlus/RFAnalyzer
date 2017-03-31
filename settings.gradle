@@ -1,1 +1,2 @@
 include ':app', ':hackrf_android'
+include ':app', ':dsp_lib'

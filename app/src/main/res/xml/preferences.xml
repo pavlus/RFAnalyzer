@@ -19,18 +19,19 @@
                 android:key="@string/pref_filesource_category"
                 android:title="@string/pref_filesource_category_title">
                 <EditTextPreference
-                    android:key="@string/pref_filesource_frequency"
-                    android:title="@string/pref_filesource_frequency_title"
-                    android:dialogTitle="@string/pref_filesource_frequency_title"
                     android:defaultValue="@string/pref_filesource_frequency_default"
-                    android:inputType="number"/>
+                    android:dialogTitle="@string/pref_filesource_frequency_title"
+                    android:inputType="number|numberDecimal"
+                    android:key="@string/pref_filesource_frequency"
+                    android:title="@string/pref_filesource_frequency_title"/>
                 <EditTextPreference
-                    android:key="@string/pref_filesource_sampleRate"
-                    android:title="@string/pref_filesource_sampleRate_title"
-                    android:dialogTitle="@string/pref_filesource_sampleRate_title"
                     android:defaultValue="@string/pref_filesource_sampleRate_default"
-                    android:inputType="number"/>
+                    android:dialogTitle="@string/pref_filesource_sampleRate_title"
+                    android:inputType="number|numberDecimal"
+                    android:key="@string/pref_filesource_sampleRate"
+                    android:title="@string/pref_filesource_sampleRate_title"/>
                 <EditTextPreference
+                    android:defaultValue="@string/pref_filesource_file_default"
                     android:key="@string/pref_filesource_file"
                     android:title="@string/pref_filesource_file_title"
                     android:defaultValue="@string/pref_filesource_file_default" />
@@ -103,7 +104,89 @@
                     android:title="@string/pref_rtlsdr_frequencyOffset_title"
                     android:dialogTitle="@string/pref_rtlsdr_frequencyOffset_title"
                     android:defaultValue="0"
-                    android:inputType="number|numberSigned"/>
+                    android:dialogTitle="@string/pref_rtlsdr_frequencyShift_title"
+                    android:inputType="number|numberSigned"
+                    android:key="@string/pref_rtlsdr_frequencyShift"
+                    android:title="@string/pref_rtlsdr_frequencyShift_title"/>
+            </PreferenceCategory>
+            <PreferenceCategory
+                android:key="@string/pref_hiqsdr_category"
+                android:title="@string/pref_hiqsdr_category_title">
+                <EditTextPreference
+                    android:defaultValue="@string/pref_hiqsdr_rx_frequency_default"
+                    android:dialogTitle="@string/pref_hiqsdr_rx_frequency_title"
+                    android:inputType="number|numberDecimal"
+                    android:key="@string/pref_hiqsdr_rx_frequency"
+                    android:title="@string/pref_hiqsdr_rx_frequency_title"/>
+                <SwitchPreference
+                    android:defaultValue="true"
+                    android:key="@string/pref_hiqsdr_tie_frequencies"
+                    android:summaryOn="@string/pref_hiqsdr_tie_frequencies_summ_on"
+                    android:summaryOff="@string/pref_hiqsdr_tie_frequencies_summ_off"
+                    android:title="@string/pref_hiqsdr_tie_frequencies_title"
+                    android:disableDependentsState="true"
+                    />
+                <EditTextPreference
+                    android:defaultValue="@string/pref_hiqsdr_tx_frequency_default"
+                    android:dependency="@string/pref_hiqsdr_tie_frequencies"
+                    android:dialogTitle="@string/pref_hiqsdr_tx_frequency_title"
+                    android:inputType="number|numberDecimal"
+                    android:key="@string/pref_hiqsdr_tx_frequency"
+                    android:title="@string/pref_hiqsdr_tx_frequency_title"/>
+                <EditTextPreference
+                    android:defaultValue="@string/pref_hiqsdr_sampleRate_default"
+                    android:dialogTitle="@string/pref_hiqsdr_sampleRate_title"
+                    android:inputType="number|numberDecimal"
+                    android:key="@string/pref_hiqsdr_sampleRate"
+                    android:title="@string/pref_hiqsdr_sampleRate_title"/>
+                <ListPreference
+                    android:defaultValue="@string/pref_hiqsdr_tx_mode_default"
+                    android:dialogTitle="@string/pref_hiqsdr_tx_mode_title"
+                    android:entries="@array/hiqsdr_tx_mode_names"
+                    android:entryValues="@array/hiqsdr_tx_mode_values"
+                    android:key="@string/pref_hiqsdr_tx_mode"
+                    android:title="@string/pref_hiqsdr_tx_mode_title"
+                    />
+                <ListPreference
+                    android:defaultValue="@string/pref_hiqsdr_firmware_default"
+                    android:dialogTitle="@string/pref_hiqsdr_firmware_title"
+                    android:entries="@array/hiqsdr_fw_version_names"
+                    android:entryValues="@array/hiqsdr_fw_version_values"
+                    android:key="@string/pref_hiqsdr_firmware"
+                    android:title="@string/pref_hiqsdr_firmware_title"
+                />
+                <ListPreference
+                    android:defaultValue="@string/pref_hiqsdr_antenna_default"
+                    android:dialogTitle="@string/pref_hiqsdr_antenna_title"
+                    android:entries="@array/hiqsdr_antenna_names"
+                    android:entryValues="@array/hiqsdr_antenna_values"
+                    android:key="@string/pref_hiqsdr_antenna"
+                    android:title="@string/pref_hiqsdr_antenna_title"
+                />
+
+                <EditTextPreference
+                    android:defaultValue="@string/pref_hiqsdr_ip_default"
+                    android:dialogTitle="@string/pref_hiqsdr_ip_title"
+                    android:key="@string/pref_hiqsdr_ip"
+                    android:title="@string/pref_hiqsdr_ip_title"/>
+                <EditTextPreference
+                    android:defaultValue="@string/pref_hiqsdr_command_port_default"
+                    android:dialogTitle="@string/pref_hiqsdr_command_port_title"
+                    android:inputType="number"
+                    android:key="@string/pref_hiqsdr_command_port"
+                    android:title="@string/pref_hiqsdr_command_port_title"/>
+                <EditTextPreference
+                    android:defaultValue="@string/pref_hiqsdr_rx_port_default"
+                    android:dialogTitle="@string/pref_hiqsdr_rx_port_title"
+                    android:inputType="number"
+                    android:key="@string/pref_hiqsdr_rx_port"
+                    android:title="@string/pref_hiqsdr_rx_port_title"/>
+                <EditTextPreference
+                    android:defaultValue="@string/pref_hiqsdr_tx_port_default"
+                    android:dialogTitle="@string/pref_hiqsdr_tx_port_title"
+                    android:inputType="number"
+                    android:key="@string/pref_hiqsdr_tx_port"
+                    android:title="@string/pref_hiqsdr_tx_port_title"/>
             </PreferenceCategory>
         </PreferenceScreen>
         <ListPreference
