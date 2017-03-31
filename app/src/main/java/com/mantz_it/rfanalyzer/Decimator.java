@@ -68,8 +68,8 @@ public class Decimator extends Thread {
 		this.inputReturnQueue = inputReturnQueue;
 
 		// Create output queues:
-		this.outputQueue = new ArrayBlockingQueue<SamplePacket>(OUTPUT_QUEUE_SIZE);
-		this.outputReturnQueue = new ArrayBlockingQueue<SamplePacket>(OUTPUT_QUEUE_SIZE);
+		this.outputQueue = new ArrayBlockingQueue<>(OUTPUT_QUEUE_SIZE);
+		this.outputReturnQueue = new ArrayBlockingQueue<>(OUTPUT_QUEUE_SIZE);
 		for (int i = 0; i < OUTPUT_QUEUE_SIZE; i++)
 			outputReturnQueue.offer(new SamplePacket(packetSize));
 
