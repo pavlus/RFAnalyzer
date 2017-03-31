@@ -178,6 +178,7 @@ protected void onCreate(Bundle savedInstanceState) {
 	catch (PackageManager.NameNotFoundException e) {
 		Log.e(LOGTAG, "onCreate: Cannot read version name: " + e.getMessage());
 	}
+
 	// Get references to the GUI components:
 	fl_analyzerFrame = (FrameLayout) findViewById(R.id.fl_analyzerFrame);
 
@@ -235,7 +236,6 @@ protected void onCreate(Bundle savedInstanceState) {
 	// Set the hardware volume keys to work on the music audio stream:
 	setVolumeControlStream(AudioManager.STREAM_MUSIC);
 }
-
 
 @Override
 protected void onDestroy() {
