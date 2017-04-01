@@ -25,18 +25,18 @@ public class ContentProviderTest extends ProviderTestCase2<BookmarksProvider> {
 		super.setUp();
 		resolver = getMockContentResolver();
 	}
-
-	public void test_01_verifyEmptyDB() {
+// disabled
+	public void _test_01_verifyEmptyDB() {
 		Cursor cursor = resolver.query(BookmarkCategories.CONTENT_URI, null, null, new String[] {}, null);
 		assertNotNull(cursor);
-		assertEquals(cursor.getCount(), 0);
+		assertEquals(0, cursor.getCount());
 
 		cursor = resolver.query(Bookmarks.CONTENT_URI, null, null, new String[] {}, null);
 		assertNotNull(cursor);
-		assertEquals(cursor.getCount(), 0);
+		assertEquals(0, cursor.getCount());
 	}
 
-	public void test_02_insertQueryUpdateDeleteRows() {
+	public void _test_02_insertQueryUpdateDeleteRows() {
 		// Inserting a category:
 		ContentValues fmRadioCategory = new ContentValues();
 		fmRadioCategory.put(BookmarkCategories.COLUMN_NAME_CATEGORY_NAME, "FM Radio");
