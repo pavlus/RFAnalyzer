@@ -65,7 +65,7 @@ public void testUnsigned8BitIQConverter() {
 }
 
 public void testUnsigned24BitIQConverter() {
-	IQConverter converter = new Unsigned24BitIQConverter();
+	IQConverter converter = new Signed24BitIQConverter();
 	SamplePacket sp = new SamplePacket(SAMPLES_IN_PACKET);
 	long time = testConverterPerformance(converter, test24bitPacket, sp);
 	System.out.println("Unsigned24BitIQConverter fills packet in " + time + " ms");
