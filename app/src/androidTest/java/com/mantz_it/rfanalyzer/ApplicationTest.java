@@ -26,11 +26,11 @@ protected final int SAMPLES_IN_PACKET = 2 * (1 << 20);  // 2 MiB packet
 @Override
 public void setUp() throws Exception {
 	super.setUp();
-	rnd = new Random();/*
+	rnd = new Random();
 		testPacket = new byte[SAMPLES_IN_PACKET];
 		test24bitPacket = new byte[SAMPLES_IN_PACKET * 3];
 		rnd.nextBytes(testPacket);
-		rnd.nextBytes(test24bitPacket);*/
+		rnd.nextBytes(test24bitPacket);
 }
 
 
