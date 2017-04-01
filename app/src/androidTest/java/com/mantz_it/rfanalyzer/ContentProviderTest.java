@@ -52,7 +52,7 @@ public class ContentProviderTest extends ProviderTestCase2<BookmarksProvider> {
 		bookmark1.put(Bookmarks.COLUMN_NAME_NAME, "SWR3");
 		bookmark1.put(Bookmarks.COLUMN_NAME_COMMENT, "very strong signal");
 		bookmark1.put(Bookmarks.COLUMN_NAME_CATEGORY_ID, ContentUris.parseId(fmRadioCategoryUri));
-		bookmark1.put(Bookmarks.COLUMN_NAME_FREQUENCY, 103000000l);
+		bookmark1.put(Bookmarks.COLUMN_NAME_FREQUENCY, 103000000L);
 		bookmark1.put(Bookmarks.COLUMN_NAME_CHANNEL_WIDTH, 100000);
 		bookmark1.put(Bookmarks.COLUMN_NAME_MODE, Demodulator.DEMODULATION_WFM);
 		bookmark1.put(Bookmarks.COLUMN_NAME_SQUELCH, -40);
@@ -67,7 +67,7 @@ public class ContentProviderTest extends ProviderTestCase2<BookmarksProvider> {
 		bookmark2.put(Bookmarks.COLUMN_NAME_NAME, "DasDing!");
 		bookmark2.put(Bookmarks.COLUMN_NAME_COMMENT, "very cool station");
 		bookmark2.put(Bookmarks.COLUMN_NAME_CATEGORY_ID, ContentUris.parseId(fmRadioCategoryUri));
-		bookmark2.put(Bookmarks.COLUMN_NAME_FREQUENCY, 95000000l);
+		bookmark2.put(Bookmarks.COLUMN_NAME_FREQUENCY, 95000000L);
 		bookmark2.put(Bookmarks.COLUMN_NAME_CHANNEL_WIDTH, 100000);
 		bookmark2.put(Bookmarks.COLUMN_NAME_MODE, Demodulator.DEMODULATION_WFM);
 		bookmark2.put(Bookmarks.COLUMN_NAME_SQUELCH, -50);
