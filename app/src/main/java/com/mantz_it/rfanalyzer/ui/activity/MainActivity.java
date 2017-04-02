@@ -1,10 +1,8 @@
 package com.mantz_it.rfanalyzer.ui.activity;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -14,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -29,14 +28,12 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mantz_it.rfanalyzer.AnalyzerProcessingLoop;
 import com.mantz_it.rfanalyzer.BookmarksDialog;
@@ -52,6 +49,7 @@ import com.mantz_it.rfanalyzer.device.rtlsdr.RtlsdrSource;
 import com.mantz_it.rfanalyzer.sdr.controls.RXFrequency;
 import com.mantz_it.rfanalyzer.sdr.controls.RXSampleRate;
 import com.mantz_it.rfanalyzer.ui.component.AnalyzerSurface;
+import com.mantz_it.rfanalyzer.ui.util.Toaster;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -111,6 +109,7 @@ private IQSource source = null;
 private RXFrequency rxFrequency;
 private RXSampleRate rxSampleRate;
 
+private Toaster toaster;
 private static final String LOGTAG = "MainActivity";
 private static final String RECORDING_DIR = "RFAnalyzer";
 public static final int RTL2832U_RESULT_CODE = 1234;    // arbitrary value, used when sending intent to RTL2832U
@@ -132,6 +131,7 @@ private static final String[] SOURCE_NAMES = new String[]{"filesource", "hackrf"
 @Override
 protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
+	toaster = new Toaster(this);
 
 	setContentView(R.layout.activity_main);
 	this.savedInstanceState = savedInstanceState;
@@ -209,22 +209,22 @@ protected void onCreate(Bundle savedInstanceState) {
 			running = false;
 
 			// Just inform the user about what is going on (why does this take so long? ...)
-			Toast.makeText(MainActivity.this, "Stopping and restarting RTL2832U driver...", Toast.LENGTH_SHORT).show();
+			toaster.showShort("Stopping and restarting RTL2832U driver...");
 
 			// 2) Delayed start of the Analyzer:
 			// todo: can we use notifyAll() instead of this?
-			Thread timer = new Thread("Timer Thread") {
-				@Override
-				public void run() {
-					try {
-						Thread.sleep(1500);
-						startAnalyzer();
-					}
-					catch (InterruptedException e) {
-						Log.e(LOGTAG, "onCreate: (timer thread): Interrupted while sleeping.");
-					}
+
+			Thread timer = new Thread(() ->
+			{
+				try {
+					Thread.sleep(1500);
+					startAnalyzer();
 				}
-			};
+				catch (InterruptedException e) {
+					Log.e(LOGTAG, "onCreate: (timer thread): Interrupted while sleeping.");
+				}
+			}, "Timer Thread");
+
 			timer.start();
 		}
 
@@ -344,71 +344,69 @@ public boolean onOptionsItemSelected(MenuItem item) {
 /**
  * Will update the action bar icons and titles according to the current app state
  */
+
 private void updateActionBar() {
-	this.runOnUiThread(new Runnable() {
-		@Override
-		public void run() {
-			// Set title and icon of the start/stop button according to the state:
-			if (mi_startStop != null) {
-				if (running) {
-					mi_startStop.setTitle(R.string.action_stop);
-					mi_startStop.setIcon(R.drawable.ic_action_pause);
-				} else {
-					mi_startStop.setTitle(R.string.action_start);
-					mi_startStop.setIcon(R.drawable.ic_action_play);
-				}
+	this.runOnUiThread(() -> {
+		// Set title and icon of the start/stop button according to the state:
+		if (mi_startStop != null) {
+			if (running) {
+				mi_startStop.setTitle(R.string.action_stop);
+				mi_startStop.setIcon(R.drawable.ic_action_pause);
+			} else {
+				mi_startStop.setTitle(R.string.action_start);
+				mi_startStop.setIcon(R.drawable.ic_action_play);
 			}
+		}
 
-			// Set title and icon for the demodulator mode button
-			if (mi_demodulationMode != null) {
-				int iconRes;
-				int titleRes;
-				switch (demodulationMode) {
-					case Demodulator.DEMODULATION_OFF:
-						iconRes = R.drawable.ic_action_demod_off;
-						titleRes = R.string.action_demodulation_off;
-						break;
-					case Demodulator.DEMODULATION_AM:
-						iconRes = R.drawable.ic_action_demod_am;
-						titleRes = R.string.action_demodulation_am;
-						break;
-					case Demodulator.DEMODULATION_NFM:
-						iconRes = R.drawable.ic_action_demod_nfm;
-						titleRes = R.string.action_demodulation_nfm;
-						break;
-					case Demodulator.DEMODULATION_WFM:
-						iconRes = R.drawable.ic_action_demod_wfm;
-						titleRes = R.string.action_demodulation_wfm;
-						break;
-					case Demodulator.DEMODULATION_LSB:
-						iconRes = R.drawable.ic_action_demod_lsb;
-						titleRes = R.string.action_demodulation_lsb;
-						break;
-					case Demodulator.DEMODULATION_USB:
-						iconRes = R.drawable.ic_action_demod_usb;
-						titleRes = R.string.action_demodulation_usb;
-						break;
-					default:
-						Log.e(LOGTAG, "updateActionBar: invalid mode: " + demodulationMode);
-						iconRes = -1;
-						titleRes = -1;
-						break;
-				}
-				if (titleRes > 0 && iconRes > 0) {
-					mi_demodulationMode.setTitle(titleRes);
-					mi_demodulationMode.setIcon(iconRes);
-				}
+		// Set title and icon for the demodulator mode button
+		if (mi_demodulationMode != null) {
+			int iconRes;
+			int titleRes;
+			switch (demodulationMode) {
+				case Demodulator.DEMODULATION_OFF:
+					iconRes = R.drawable.ic_action_demod_off;
+					titleRes = R.string.action_demodulation_off;
+					break;
+				case Demodulator.DEMODULATION_AM:
+					iconRes = R.drawable.ic_action_demod_am;
+					titleRes = R.string.action_demodulation_am;
+					break;
+				case Demodulator.DEMODULATION_NFM:
+					iconRes = R.drawable.ic_action_demod_nfm;
+					titleRes = R.string.action_demodulation_nfm;
+					break;
+				case Demodulator.DEMODULATION_WFM:
+					iconRes = R.drawable.ic_action_demod_wfm;
+					titleRes = R.string.action_demodulation_wfm;
+					break;
+				case Demodulator.DEMODULATION_LSB:
+					iconRes = R.drawable.ic_action_demod_lsb;
+					titleRes = R.string.action_demodulation_lsb;
+					break;
+				case Demodulator.DEMODULATION_USB:
+					iconRes = R.drawable.ic_action_demod_usb;
+					titleRes = R.string.action_demodulation_usb;
+					break;
+				default:
+					Log.e(LOGTAG, "updateActionBar: invalid mode: " + demodulationMode);
+					iconRes = -1;
+					titleRes = -1;
+					break;
 			}
+			if (titleRes > 0 && iconRes > 0) {
+				mi_demodulationMode.setTitle(titleRes);
+				mi_demodulationMode.setIcon(iconRes);
+			}
+		}
 
-			// Set title and icon of the record button according to the state:
-			if (mi_record != null) {
-				if (recordingFile != null) {
-					mi_record.setTitle(R.string.action_recordOn);
-					mi_record.setIcon(R.drawable.ic_action_record_on);
-				} else {
-					mi_record.setTitle(R.string.action_recordOff);
-					mi_record.setIcon(R.drawable.ic_action_record_off);
-				}
+		// Set title and icon of the record button according to the state:
+		if (mi_record != null) {
+			if (recordingFile != null) {
+				mi_record.setTitle(R.string.action_recordOn);
+				mi_record.setIcon(R.drawable.ic_action_record_on);
+			} else {
+				mi_record.setTitle(R.string.action_recordOff);
+				mi_record.setIcon(R.drawable.ic_action_record_off);
 			}
 		}
 	});
@@ -505,8 +503,8 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 				              + (detailedDescription != null ? ": " + detailedDescription + " (" + exceptionCode + ")" : ""));
 
 				if (source != null && source instanceof RtlsdrSource) {
-					Toast.makeText(MainActivity.this, "Error with Source [" + source.getName() + "]: " + errorMsg + " (" + errorId + ")"
-					                                  + (detailedDescription != null ? ": " + detailedDescription + " (" + exceptionCode + ")" : ""), Toast.LENGTH_LONG).show();
+					toaster.showLong("Error with Source [" + source.getName() + "]: " + errorMsg + " (" + errorId + ")"
+					                 + (detailedDescription != null ? ": " + detailedDescription + " (" + exceptionCode + ")" : ""));
 					source.close();
 				}
 			}
@@ -515,7 +513,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 }
 
 //@Override
-public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+public void onRequestPermissionsResult(int requestCode, String permissions[], @NonNull int[] grantResults) {
 	switch (requestCode) {
 		case PERMISSION_REQUEST_FILE_SOURCE_READ_FILES: {
 			// If request is cancelled, the result arrays are empty.
@@ -550,12 +548,7 @@ public void onIQSourceReady(IQSource source) {    // is called after source.open
 @Override
 public void onIQSourceError(final IQSource source, final String message) {
 	Log.e(LOGTAG, source.getName() + ": " + message);
-	this.runOnUiThread(new Runnable() {
-		@Override
-		public void run() {
-			Toast.makeText(MainActivity.this, "Error with Source [" + source.getName() + "]: " + message, Toast.LENGTH_LONG).show();
-		}
-	});
+	this.runOnUiThread(() -> toaster.showLong("Error with Source [" + source.getName() + "]: " + message));
 	stopAnalyzer();
 
 	if (this.source != null && this.source.isOpen())
@@ -608,12 +601,7 @@ protected void updateSourcePreferences(final Class<?> clazz) {
 			e.printStackTrace();
 		}
 		stopAnalyzer();
-		this.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				Toast.makeText(MainActivity.this, "Error with instantiating source [" + clazz.getName() + "]: " + msg, Toast.LENGTH_LONG).show();
-			}
-		});
+		this.runOnUiThread(() -> toaster.showLong("Error with instantiating source [" + clazz.getName() + "]: "));
 		setSource(null);
 	}
 }
@@ -755,16 +743,12 @@ public boolean openSource() {
 						new AlertDialog.Builder(this)
 								.setTitle("RTL2832U driver not installed!")
 								.setMessage("You need to install the (free) RTL2832U driver to use RTL-SDR dongles.")
-								.setPositiveButton("Install from Google Play", new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog, int whichButton) {
-										Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=marto.rtl_tcp_andro"));
-										startActivity(marketIntent);
-									}
+								.setPositiveButton("Install from Google Play", (dialog, whichButton) -> {
+									Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=marto.rtl_tcp_andro"));
+									startActivity(marketIntent);
 								})
-								.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog, int whichButton) {
-										// do nothing
-									}
+								.setNegativeButton("Cancel", (dialog, whichButton) -> {
+									// do nothing
 								})
 								.show();
 						return false;
@@ -846,12 +830,7 @@ public void stopAnalyzer() {
 	updateActionBar();
 
 	// allow screen to turn off again:
-	this.runOnUiThread(new Runnable() {
-		@Override
-		public void run() {
-			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		}
-	});
+	this.runOnUiThread(() -> getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON));
 }
 
 /**
@@ -877,7 +856,7 @@ public void startAnalyzer() {
 	// check if the source is open. if not, open it!
 	if (!source.isOpen()) {
 		if (!openSource()) {
-			Toast.makeText(MainActivity.this, "Source not available (" + source.getName() + ")", Toast.LENGTH_LONG).show();
+			toaster.showLong("Source not available (" + source.getName() + ")");
 			running = false;
 			return;
 		}
@@ -915,12 +894,7 @@ public void startAnalyzer() {
 	updateActionBar();
 
 	// Prevent the screen from turning off:
-	this.runOnUiThread(new Runnable() {
-		@Override
-		public void run() {
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		}
-	});
+	this.runOnUiThread(() -> getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON));
 }
 
 /**
@@ -928,17 +902,15 @@ public void startAnalyzer() {
  */
 private void showDemodulationDialog() {
 	if (scheduler == null || demodulator == null || source == null) {
-		Toast.makeText(MainActivity.this, "Analyzer must be running to change modulation mode", Toast.LENGTH_LONG).show();
+		toaster.showLong("Analyzer must be running to change modulation mode");
 		return;
 	}
 
 	new AlertDialog.Builder(this)
 			.setTitle("Select a demodulation mode:")
-			.setSingleChoiceItems(R.array.demodulation_modes, demodulator.getDemodulationMode(), new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int which) {
-					setDemodulationMode(which);
-					dialog.dismiss();
-				}
+			.setSingleChoiceItems(R.array.demodulation_modes, demodulator.getDemodulationMode(), (dialog, which) -> {
+				setDemodulationMode(which);
+				dialog.dismiss();
 			})
 			.show();
 }
@@ -963,20 +935,15 @@ public void setDemodulationMode(int mode) {
 			// We are recording at an incompatible sample rate right now.
 			Log.i(LOGTAG, "setDemodulationMode: Recording is running at "
 			              + rxSampleRate.get() + " Sps, but demodulator doesn't support it");
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					Toast.makeText(MainActivity.this, "Recording is running at incompatible sample rate for demodulation!", Toast.LENGTH_LONG).show();
-				}
-			});
+			runOnUiThread(() -> toaster.showLong("Recording is running at incompatible sample rate for demodulation!"));
 			return;
 		}
 
 		// Verify that the source supports the sample rate:
 		if (!Demodulator.supportsSampleRate(mode, rxSampleRate.get())) {
 			Log.e(LOGTAG, "setDemodulationMode: demodulator doesn't support selected sample rate");
-			Toast.makeText(MainActivity.this, "Demodulator doesn't support current sample rate: " +
-			                                  rxSampleRate.get() / 1000 + " Ksps)", Toast.LENGTH_LONG).show();
+			toaster.showLong("Demodulator doesn't support current sample rate: " +
+			                 rxSampleRate.get() / 1000 + " Ksps)");
 			scheduler.setDemodulationActivated(false);
 			mode = Demodulator.DEMODULATION_OFF;    // deactivate demodulation...
 		} else
@@ -1029,12 +996,9 @@ private void tuneToFrequency() {
 	if (recordingFile != null)
 		tv_warning.setVisibility(View.VISIBLE);
 
-	cb_bandwidth.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-		@Override
-		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-			et_bandwidth.setEnabled(isChecked);
-			sp_bandwidthUnit.setEnabled(isChecked);
-		}
+	cb_bandwidth.setOnCheckedChangeListener((buttonView, isChecked) -> {
+		et_bandwidth.setEnabled(isChecked);
+		sp_bandwidthUnit.setEnabled(isChecked);
 	});
 	cb_bandwidth.toggle();    // to trigger the onCheckedChangeListener at least once to set inital state
 	cb_bandwidth.setChecked(preferences.getBoolean(getString(R.string.pref_tune_to_frequency_setBandwidth), false));
@@ -1046,62 +1010,58 @@ private void tuneToFrequency() {
 			.setTitle("Tune to Frequency")
 			.setMessage(String.format("Frequency is %f MHz. Type a new Frequency: ", rxFrequency.get() / 1000000f))
 			.setView(ll_view)
-			.setPositiveButton("Set", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					try {
-						double newFreq = rxFrequency.get() / 1000000f;
-						if (et_frequency.getText().length() != 0)
-							newFreq = Double.valueOf(et_frequency.getText().toString());
-						switch (sp_unit.getSelectedItemPosition()) {
-							case 0: // MHz
-								newFreq *= 1000000; break;
-							case 1: // KHz
-								newFreq *= 1000; break;
-							default: // Hz
-						}
-
-						if (newFreq < maxFreqMHz)
-							newFreq = newFreq * 1000000;
-						if (newFreq <= rxFrequency.getMax() && newFreq >= rxFrequency.getMin()) {
-							rxFrequency.set((long) newFreq);
-							analyzerSurface.setVirtualFrequency((long) newFreq);
-							if (demodulationMode != Demodulator.DEMODULATION_OFF)
-								analyzerSurface.setDemodulationEnabled(true);    // This will re-adjust the channel freq correctly
-
-							// Set bandwidth (virtual sample rate):
-							if (cb_bandwidth.isChecked() && et_bandwidth.getText().length() != 0) {
-								float bandwidth = Float.parseFloat(et_bandwidth.getText().toString());
-								if (sp_bandwidthUnit.getSelectedItemPosition() == 0)            //MHz
-									bandwidth *= 1000000;
-								else if (sp_bandwidthUnit.getSelectedItemPosition() == 1)    //KHz
-									bandwidth *= 1000;
-								if (bandwidth > rxSampleRate.getMax())
-									bandwidth = rxFrequency.getMax();
-								rxSampleRate.set(rxSampleRate.getNextHigherOptimalSampleRate((int) bandwidth));
-								analyzerSurface.setVirtualSampleRate((int) bandwidth);
-							}
-							// safe preferences:
-							SharedPreferences.Editor edit = preferences.edit();
-							edit.putInt(getString(R.string.pref_tune_to_frequency_unit), sp_unit.getSelectedItemPosition());
-							edit.putBoolean(getString(R.string.pref_tune_to_frequency_setBandwidth), cb_bandwidth.isChecked());
-							edit.putString(getString(R.string.pref_tune_to_frequency_bandwidth), et_bandwidth.getText().toString());
-							edit.putInt(getString(R.string.pref_tune_to_frequency_bandwidthUnit), sp_bandwidthUnit.getSelectedItemPosition());
-							edit.apply();
-
-						} else {
-							Toast.makeText(MainActivity.this, "Frequency is out of the valid range: " + (long) newFreq + " Hz", Toast.LENGTH_LONG).show();
-						}
+			.setPositiveButton("Set", (dialog, whichButton) -> {
+				try {
+					double newFreq = rxFrequency.get() / 1000000f;
+					if (et_frequency.getText().length() != 0)
+						newFreq = Double.valueOf(et_frequency.getText().toString());
+					switch (sp_unit.getSelectedItemPosition()) {
+						case 0: // MHz
+							newFreq *= 1000000; break;
+						case 1: // KHz
+							newFreq *= 1000; break;
+						default: // Hz
 					}
-					catch (NumberFormatException e) {
-						// todo: notify user
-						Log.e(LOGTAG, "tuneToFrequency: Error while setting frequency: " + e.getMessage());
+
+					if (newFreq < maxFreqMHz)
+						newFreq = newFreq * 1000000;
+					if (newFreq <= rxFrequency.getMax() && newFreq >= rxFrequency.getMin()) {
+						rxFrequency.set((long) newFreq);
+						analyzerSurface.setVirtualFrequency((long) newFreq);
+						if (demodulationMode != Demodulator.DEMODULATION_OFF)
+							analyzerSurface.setDemodulationEnabled(true);    // This will re-adjust the channel freq correctly
+
+						// Set bandwidth (virtual sample rate):
+						if (cb_bandwidth.isChecked() && et_bandwidth.getText().length() != 0) {
+							float bandwidth = Float.parseFloat(et_bandwidth.getText().toString());
+							if (sp_bandwidthUnit.getSelectedItemPosition() == 0)            //MHz
+								bandwidth *= 1000000;
+							else if (sp_bandwidthUnit.getSelectedItemPosition() == 1)    //KHz
+								bandwidth *= 1000;
+							if (bandwidth > rxSampleRate.getMax())
+								bandwidth = rxFrequency.getMax();
+							rxSampleRate.set(rxSampleRate.getNextHigherOptimalSampleRate((int) bandwidth));
+							analyzerSurface.setVirtualSampleRate((int) bandwidth);
+						}
+						// safe preferences:
+						SharedPreferences.Editor edit = preferences.edit();
+						edit.putInt(getString(R.string.pref_tune_to_frequency_unit), sp_unit.getSelectedItemPosition());
+						edit.putBoolean(getString(R.string.pref_tune_to_frequency_setBandwidth), cb_bandwidth.isChecked());
+						edit.putString(getString(R.string.pref_tune_to_frequency_bandwidth), et_bandwidth.getText().toString());
+						edit.putInt(getString(R.string.pref_tune_to_frequency_bandwidthUnit), sp_bandwidthUnit.getSelectedItemPosition());
+						edit.apply();
+
+					} else {
+						toaster.showLong("Frequency is out of the valid range: " + (long) newFreq + " Hz");
 					}
+				}
+				catch (NumberFormatException e) {
+					// todo: notify user
+					Log.e(LOGTAG, "tuneToFrequency: Error while setting frequency: " + e.getMessage());
 				}
 			})
-			.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					// do nothing
-				}
+			.setNegativeButton("Cancel", (dialog, whichButton) -> {
+				// do nothing
 			})
 			.show();
 }
@@ -1117,7 +1077,7 @@ private void adjustGain() {
 
 public void showRecordingDialog() {
 	if (!running || scheduler == null || demodulator == null || source == null) {
-		Toast.makeText(MainActivity.this, "Analyzer must be running to start recording", Toast.LENGTH_LONG).show();
+		toaster.showLong("Analyzer must be running to start recording");
 		return;
 	}
 	// Check for the WRITE_EXTERNAL_STORAGE permission:
@@ -1188,12 +1148,9 @@ public void showRecordingDialog() {
 		public void onNothingSelected(AdapterView<?> parent) {
 		}
 	});
-	cb_stopAfter.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-		@Override
-		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-			et_stopAfter.setEnabled(isChecked);
-			sp_stopAfter.setEnabled(isChecked);
-		}
+	cb_stopAfter.setOnCheckedChangeListener((buttonView, isChecked) -> {
+		et_stopAfter.setEnabled(isChecked);
+		sp_stopAfter.setEnabled(isChecked);
 	});
 
 	// Set default frequency, sample rate and stop after values:
@@ -1224,105 +1181,101 @@ public void showRecordingDialog() {
 	new AlertDialog.Builder(this)
 			.setTitle("Start recording")
 			.setView(view)
-			.setPositiveButton("Record", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					String filename = et_filename.getText().toString();
-					final int stopAfterUnit = sp_stopAfter.getSelectedItemPosition();
-					final int stopAfterValue = Integer.parseInt(et_stopAfter.getText().toString());
-					//todo check filename
+			.setPositiveButton("Record", (dialog, whichButton) -> {
+						String filename = et_filename.getText().toString();
+						final int stopAfterUnit = sp_stopAfter.getSelectedItemPosition();
+						final int stopAfterValue = Integer.parseInt(et_stopAfter.getText().toString());
+						//todo check filename
 
-					// Set the frequency in the source:
-					if (et_frequency.getText().length() == 0)
-						return;
-					double freq = Double.parseDouble(et_frequency.getText().toString());
-					if (freq < maxFreqMHz)
-						freq = freq * 1000000;
-					if (freq <= rxFrequency.getMax() && freq >= rxFrequency.getMin())
-						rxFrequency.set((long) freq);
-					else {
-						Toast.makeText(MainActivity.this, "Frequency is invalid!", Toast.LENGTH_LONG).show();
-						return;
-					}
+						// Set the frequency in the source:
+						if (et_frequency.getText().length() == 0)
+							return;
+						double freq = Double.parseDouble(et_frequency.getText().toString());
+						if (freq < maxFreqMHz)
+							freq = freq * 1000000;
+						if (freq <= rxFrequency.getMax() && freq >= rxFrequency.getMin())
+							rxFrequency.set((long) freq);
+						else {
+							toaster.showLong("Frequency is invalid!");
+							return;
+						}
 
-					// Set the sample rate (only if demodulator is off):
-					if (demodulationMode == Demodulator.DEMODULATION_OFF)
-						rxSampleRate.set((Integer) sp_sampleRate.getSelectedItem());
+						// Set the sample rate (only if demodulator is off):
+						if (demodulationMode == Demodulator.DEMODULATION_OFF)
+							rxSampleRate.set((Integer) sp_sampleRate.getSelectedItem());
 
-					// Open file and start recording:
-					recordingFile = new File(externalDir + "/" + RECORDING_DIR + "/" + filename);
-					recordingFile.getParentFile().mkdir();    // Create directory if it does not yet exist
-					try {
-						scheduler.startRecording(new BufferedOutputStream(new FileOutputStream(recordingFile)));
-					}
-					catch (FileNotFoundException e) {
-						Log.e(LOGTAG, "showRecordingDialog: File not found: " + recordingFile.getAbsolutePath());
-					}
+						// Open file and start recording:
+						recordingFile = new File(externalDir + "/" + RECORDING_DIR + "/" + filename);
+						recordingFile.getParentFile().mkdir();    // Create directory if it does not yet exist
+						try {
+							scheduler.startRecording(new BufferedOutputStream(new FileOutputStream(recordingFile)));
+						}
+						catch (FileNotFoundException e) {
+							Log.e(LOGTAG, "showRecordingDialog: File not found: " + recordingFile.getAbsolutePath());
+						}
 
-					// safe preferences:
-					SharedPreferences.Editor edit = preferences.edit();
-					edit.putInt(getString(R.string.pref_recordingSampleRate), (Integer) sp_sampleRate.getSelectedItem());
-					edit.putBoolean(getString(R.string.pref_recordingStopAfterEnabled), cb_stopAfter.isChecked());
-					edit.putInt(getString(R.string.pref_recordingStopAfterValue), stopAfterValue);
-					edit.putInt(getString(R.string.pref_recordingStopAfterUnit), stopAfterUnit);
-					edit.apply();
+						// safe preferences:
+						SharedPreferences.Editor edit = preferences.edit();
+						edit.putInt(getString(R.string.pref_recordingSampleRate), (Integer) sp_sampleRate.getSelectedItem());
+						edit.putBoolean(getString(R.string.pref_recordingStopAfterEnabled), cb_stopAfter.isChecked());
+						edit.putInt(getString(R.string.pref_recordingStopAfterValue), stopAfterValue);
+						edit.putInt(getString(R.string.pref_recordingStopAfterUnit), stopAfterUnit);
+						edit.apply();
 
-					analyzerSurface.setRecordingEnabled(true);
+						analyzerSurface.setRecordingEnabled(true);
 
-					updateActionBar();
+						updateActionBar();
 
-					// if stopAfter was selected, start thread to supervise the recording:
-					if (cb_stopAfter.isChecked()) {
-						Thread supervisorThread = new Thread("Supervisor Thread") {
-							@Override
-							public void run() {
-								Log.i(LOGTAG, "recording_superviser: Supervisor Thread started. (Thread: " + this.getName() + ")");
-								try {
-									long startTime = System.currentTimeMillis();
-									boolean stop = false;
+						// if stopAfter was selected, start thread to supervise the recording:
+						if (cb_stopAfter.isChecked()) {
+							final String recorderSuperviserName = "Supervisor Thread";
+							Thread supervisorThread = new Thread(()-> {
+									Log.i(LOGTAG, "recording_superviser: Supervisor Thread started. (Thread: " + recorderSuperviserName + ")");
+									try {
+										long startTime = System.currentTimeMillis();
+										boolean stop = false;
 
-									// We check once per half a second if the stop criteria is met:
-									Thread.sleep(500);
-									while (recordingFile != null && !stop) {
-										switch (stopAfterUnit) {    // see arrays.xml - recording_stopAfterUnit
-											case 0: /* MB */
-												if (recordingFile.length() / 1000000 >= stopAfterValue)
-													stop = true;
-												break;
-											case 1: /* GB */
-												if (recordingFile.length() / 1000000000 >= stopAfterValue)
-													stop = true;
-												break;
-											case 2: /* sec */
-												if (System.currentTimeMillis() - startTime >= stopAfterValue * 1000)
-													stop = true;
-												break;
-											case 3: /* min */
-												if (System.currentTimeMillis() - startTime >= stopAfterValue * 1000 * 60)
-													stop = true;
-												break;
+										// We check once per half a second if the stop criteria is met:
+										Thread.sleep(500);
+										while (recordingFile != null && !stop) {
+											switch (stopAfterUnit) {    // see arrays.xml - recording_stopAfterUnit
+												case 0: /* MB */
+													if (recordingFile.length() / 1000000 >= stopAfterValue)
+														stop = true;
+													break;
+												case 1: /* GB */
+													if (recordingFile.length() / 1000000000 >= stopAfterValue)
+														stop = true;
+													break;
+												case 2: /* sec */
+													if (System.currentTimeMillis() - startTime >= stopAfterValue * 1000)
+														stop = true;
+													break;
+												case 3: /* min */
+													if (System.currentTimeMillis() - startTime >= stopAfterValue * 1000 * 60)
+														stop = true;
+													break;
+											}
 										}
+										// stop recording:
+										stopRecording();
 									}
-									// stop recording:
-									stopRecording();
-								}
-								catch (InterruptedException e) {
-									// todo: shouldn't we call stopRecording() here? how about finally{}?
-									Log.e(LOGTAG, "recording_superviser: Interrupted!");
-								}
-								catch (NullPointerException e) {
-									Log.e(LOGTAG, "recording_superviser: Recording file is null!");
-								}
-								Log.i(LOGTAG, "recording_superviser: Supervisor Thread stopped. (Thread: " + this.getName() + ")");
-							}
-						};
-						supervisorThread.start();
+									catch (InterruptedException e) {
+										// todo: shouldn't we call stopRecording() here? how about finally{}?
+										Log.e(LOGTAG, "recording_superviser: Interrupted!");
+									}
+									catch (NullPointerException e) {
+										Log.e(LOGTAG, "recording_superviser: Recording file is null!");
+									}
+									Log.i(LOGTAG, "recording_superviser: Supervisor Thread stopped. (Thread: " + recorderSuperviserName + ")");
+
+							}, recorderSuperviserName);
+							supervisorThread.start();
+						}
 					}
-				}
-			})
-			.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					// do nothing
-				}
+			)
+			.setNegativeButton("Cancel", (dialog, whichButton) -> {
+				// do nothing
 			})
 			.show()
 			.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -1335,12 +1288,7 @@ public void stopRecording() {
 	if (recordingFile != null) {
 		final String filename = recordingFile.getAbsolutePath();
 		final long filesize = recordingFile.length() / 1000000;    // file size in MB
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				Toast.makeText(MainActivity.this, "Recording stopped: " + filename + " (" + filesize + " MB)", Toast.LENGTH_LONG).show();
-			}
-		});
+		runOnUiThread(() -> toaster.showLong("Recording stopped: " + filename + " (" + filesize + " MB)"));
 		recordingFile = null;
 		updateActionBar();
 	}
@@ -1351,7 +1299,7 @@ public void stopRecording() {
 public void showBookmarksDialog() {
 	// show warning toast if recording is running:
 	if (recordingFile != null)
-		Toast.makeText(this, "WARNING: Recording is running!", Toast.LENGTH_LONG).show();
+		toaster.showLong("WARNING: Recording is running!");
 	new BookmarksDialog(this, this);
 }
 
@@ -1359,10 +1307,8 @@ public void showInfoDialog() {
 	AlertDialog dialog = new AlertDialog.Builder(this)
 			.setTitle(Html.fromHtml(getString(R.string.info_title, versionName)))
 			.setMessage(Html.fromHtml(getString(R.string.info_msg_body)))
-			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					// Do nothing
-				}
+			.setPositiveButton("OK", (dialog1, whichButton) -> {
+				// Do nothing
 			})
 			.create();
 	dialog.show();

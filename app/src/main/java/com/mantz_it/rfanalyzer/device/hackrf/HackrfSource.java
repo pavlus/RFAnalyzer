@@ -98,18 +98,18 @@ private MixerFrequency mixerFrequency;
 private MixerSampleRate mixerSampleRate;
 private final Map<Class<? extends Control>, Control> controls = new HashMap<>();
 
-{
+public HackrfSource() {
+	iqConverter = new Signed8BitIQConverter();
+
+	mixerFrequency = iqConverter.getControl(MixerFrequency.class);
+	mixerSampleRate = iqConverter.getControl(MixerSampleRate.class);
+
+	rxSampleRate = new HackrfRXSampleRate(this, mixerSampleRate, basebandFilterControl);
+	rxFrequency = new HackrfRXFrequency(this, mixerFrequency);
+
 	controls.put(HackrfRXFrequency.class, rxFrequency);
 	controls.put(RXSampleRate.class, rxSampleRate);
 	controls.put(HackrfBasebandFilterControl.class, basebandFilterControl);
-}
-
-public HackrfSource() {
-	iqConverter = new Signed8BitIQConverter();
-	mixerFrequency = iqConverter.getControl(MixerFrequency.class);
-	mixerSampleRate = iqConverter.getControl(MixerSampleRate.class);
-	rxSampleRate = new HackrfRXSampleRate(this, mixerSampleRate, basebandFilterControl);
-	rxFrequency = new HackrfRXFrequency(this, mixerFrequency);
 }
 
 public HackrfSource(Context context, SharedPreferences preferences) {
@@ -190,32 +190,25 @@ public void showGainDialog(final Activity activity, final SharedPreferences pref
 	AlertDialog hackrfDialog = new AlertDialog.Builder(activity)
 			.setTitle("Adjust Gain Settings")
 			.setView(view_hackrf)
-			.setPositiveButton("Set", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					// safe preferences:
-					SharedPreferences.Editor edit = preferences.edit();
-					edit.putInt(activity.getString(R.string.pref_hackrf_vgaRxGain), sb_hackrf_vga.getProgress() * HackrfSource.VGA_RX_GAIN_STEP_SIZE);
-					edit.putInt(activity.getString(R.string.pref_hackrf_lnaGain), sb_hackrf_lna.getProgress() * HackrfSource.LNA_GAIN_STEP_SIZE);
-					edit.apply();
-				}
+			.setPositiveButton("Set", (dialog, whichButton) -> {
+				// safe preferences:
+				SharedPreferences.Editor edit = preferences.edit();
+				edit.putInt(activity.getString(R.string.pref_hackrf_vgaRxGain), sb_hackrf_vga.getProgress() * HackrfSource.VGA_RX_GAIN_STEP_SIZE);
+				edit.putInt(activity.getString(R.string.pref_hackrf_lnaGain), sb_hackrf_lna.getProgress() * HackrfSource.LNA_GAIN_STEP_SIZE);
+				edit.apply();
 			})
-			.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					// do nothing
-				}
+			.setNegativeButton("Cancel", (dialog, whichButton) -> {
+				// do nothing
 			})
 			.create();
-	hackrfDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-		@Override
-		public void onDismiss(DialogInterface dialog) {
-			// sync source with (new/old) settings
-			int vgaRxGain = preferences.getInt(activity.getString(R.string.pref_hackrf_vgaRxGain), HackrfSource.MAX_VGA_RX_GAIN / 2);
-			int lnaGain = preferences.getInt(activity.getString(R.string.pref_hackrf_lnaGain), HackrfSource.MAX_LNA_GAIN / 2);
-			if (getVgaRxGain() != vgaRxGain)
-				setVgaRxGain(vgaRxGain);
-			if (getLnaGain() != lnaGain)
-				setLnaGain(lnaGain);
-		}
+	hackrfDialog.setOnDismissListener(dialog -> {
+		// sync source with (new/old) settings
+		int vgaRxGain1 = preferences.getInt(activity.getString(R.string.pref_hackrf_vgaRxGain), HackrfSource.MAX_VGA_RX_GAIN / 2);
+		int lnaGain1 = preferences.getInt(activity.getString(R.string.pref_hackrf_lnaGain), HackrfSource.MAX_LNA_GAIN / 2);
+		if (getVgaRxGain() != vgaRxGain1)
+			setVgaRxGain(vgaRxGain1);
+		if (getLnaGain() != lnaGain1)
+			setLnaGain(lnaGain1);
 	});
 	hackrfDialog.show();
 	hackrfDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);

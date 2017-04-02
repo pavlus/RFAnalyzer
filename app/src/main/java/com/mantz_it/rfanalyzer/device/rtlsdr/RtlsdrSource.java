@@ -284,26 +284,18 @@ public void showGainDialog(final Activity activity, final SharedPreferences pref
 	cb_rtlsdr_agc.setChecked(agcSwitch.get());
 
 	// Add listener to gui elements:
-	sw_rtlsdr_manual_gain.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
-		@Override
-		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-			sb_rtlsdr_gain.setEnabled(isChecked);
-			tv_rtlsdr_gain.setEnabled(isChecked);
-			sb_rtlsdr_ifGain.setEnabled(isChecked);
-			tv_rtlsdr_ifGain.setEnabled(isChecked);
-			manualGainSwitch.set(isChecked);
-			if (isChecked) {
-				manualGainControl.setByIndex(sb_rtlsdr_gain.getProgress());
-				ifGain.setByIndex(sb_rtlsdr_ifGain.getProgress());
-			}
+	sw_rtlsdr_manual_gain.setOnCheckedChangeListener((buttonView, isChecked) -> {
+		sb_rtlsdr_gain.setEnabled(isChecked);
+		tv_rtlsdr_gain.setEnabled(isChecked);
+		sb_rtlsdr_ifGain.setEnabled(isChecked);
+		tv_rtlsdr_ifGain.setEnabled(isChecked);
+		manualGainSwitch.set(isChecked);
+		if (isChecked) {
+			manualGainControl.setByIndex(sb_rtlsdr_gain.getProgress());
+			ifGain.setByIndex(sb_rtlsdr_ifGain.getProgress());
 		}
 	});
-	cb_rtlsdr_agc.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-		@Override
-		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-			getControl(AutomaticGainSwitchControl.class).set(isChecked);
-		}
-	});
+	cb_rtlsdr_agc.setOnCheckedChangeListener((buttonView, isChecked) -> getControl(AutomaticGainSwitchControl.class).set(isChecked));
 	// todo: don't update on slide
 	sb_rtlsdr_gain.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 		@Override
@@ -354,41 +346,34 @@ public void showGainDialog(final Activity activity, final SharedPreferences pref
 	AlertDialog rtlsdrDialog = new AlertDialog.Builder(activity)
 			.setTitle("Adjust Gain Settings")
 			.setView(view_rtlsdr)
-			.setPositiveButton("Set", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					// safe preferences:
-					SharedPreferences.Editor edit = preferences.edit();
-					edit.putBoolean(activity.getString(R.string.pref_rtlsdr_manual_gain), sw_rtlsdr_manual_gain.isChecked());
-					edit.putBoolean(activity.getString(R.string.pref_rtlsdr_agc), cb_rtlsdr_agc.isChecked());
-					edit.putInt(activity.getString(R.string.pref_rtlsdr_gain), manualGainControl.valueAt(sb_rtlsdr_gain.getProgress()));
-					edit.putInt(activity.getString(R.string.pref_rtlsdr_ifGain),
-							ifGain.valueAt(sb_rtlsdr_ifGain.getProgress()));
-					edit.apply();
-				}
+			.setPositiveButton("Set", (dialog, whichButton) -> {
+				// safe preferences:
+				SharedPreferences.Editor edit = preferences.edit();
+				edit.putBoolean(activity.getString(R.string.pref_rtlsdr_manual_gain), sw_rtlsdr_manual_gain.isChecked());
+				edit.putBoolean(activity.getString(R.string.pref_rtlsdr_agc), cb_rtlsdr_agc.isChecked());
+				edit.putInt(activity.getString(R.string.pref_rtlsdr_gain), manualGainControl.valueAt(sb_rtlsdr_gain.getProgress()));
+				edit.putInt(activity.getString(R.string.pref_rtlsdr_ifGain),
+						ifGain.valueAt(sb_rtlsdr_ifGain.getProgress()));
+				edit.apply();
 			})
-			.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					// do nothing
-				}
+			.setNegativeButton("Cancel", (dialog, whichButton) -> {
+				// do nothing
 			})
 			.create();
-	rtlsdrDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-		@Override
-		public void onDismiss(DialogInterface dialog) {
-			boolean manualGain = preferences.getBoolean(activity.getString(R.string.pref_rtlsdr_manual_gain), false);
-			boolean agc = preferences.getBoolean(activity.getString(R.string.pref_rtlsdr_agc), false);
-			int gain = preferences.getInt(activity.getString(R.string.pref_rtlsdr_gain), 0);
-			int ifGainValue = preferences.getInt(activity.getString(R.string.pref_rtlsdr_ifGain), 0);
+	rtlsdrDialog.setOnDismissListener(dialog -> {
+		boolean manualGain = preferences.getBoolean(activity.getString(R.string.pref_rtlsdr_manual_gain), false);
+		boolean agc = preferences.getBoolean(activity.getString(R.string.pref_rtlsdr_agc), false);
+		int gain = preferences.getInt(activity.getString(R.string.pref_rtlsdr_gain), 0);
+		int ifGainValue = preferences.getInt(activity.getString(R.string.pref_rtlsdr_ifGain), 0);
+		manualGainControl.set(gain);
+		ifGain.set(ifGainValue);
+		manualGainSwitch.set(manualGain);
+		agcSwitch.set(agc);
+		if (manualGain) {
+			// Note: This is a workaround. After setting manual gain to true we must
+			// rewrite the manual gain values:
 			manualGainControl.set(gain);
 			ifGain.set(ifGainValue);
-			manualGainSwitch.set(manualGain);
-			agcSwitch.set(agc);
-			if (manualGain) {
-				// Note: This is a workaround. After setting manual gain to true we must
-				// rewrite the manual gain values:
-				manualGainControl.set(gain);
-				ifGain.set(ifGainValue);
-			}
 		}
 	});
 	rtlsdrDialog.show();
