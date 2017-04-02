@@ -99,21 +99,13 @@ public class BookmarksDialog implements View.OnClickListener, AdapterView.OnItem
 		dialog = new AlertDialog.Builder(activity)
 				.setTitle("Bookmarks")
 				.setView(ll_root)
-				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// do nothing
-					}
-				})
+				.setNegativeButton("Cancel", (dialog1, which) -> {/* do nothing */})
 				.create();
-		dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-				if(bookmarksCursor != null)
-					bookmarksCursor.close();
-				if(categoriesCursor != null)
-					categoriesCursor.close();
-			}
+		dialog.setOnDismissListener(dialog12 -> {
+			if(bookmarksCursor != null)
+				bookmarksCursor.close();
+			if(categoriesCursor != null)
+				categoriesCursor.close();
 		});
 		dialog.show();
 		dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -211,27 +203,24 @@ public class BookmarksDialog implements View.OnClickListener, AdapterView.OnItem
 		// Creating a popup menu beside the long clicked view:
 		PopupMenu popup = new PopupMenu(dialog.getContext(), view);
 		popup.getMenuInflater().inflate(R.menu.bookmarks_menu, popup.getMenu());
-		popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-			@Override
-			public boolean onMenuItemClick(MenuItem item) {
-				if(item.getItemId() == R.id.bookmarks_edit) {
-					if(parent==lv_categories)
-						new EditBookmarkCategoryDialog(activity, id);
-					else if(parent==lv_bookmarks)
-						new EditBookmarkDialog(activity, id);
-					else
-						Log.e(LOGTAG, "onItemLongClick: Unknown parent list: " + parent);
-				}
-				else if(item.getItemId() == R.id.bookmarks_delete) {
-					if(parent==lv_categories)
-						deleteCategory(id);
-					else if(parent==lv_bookmarks)
-						deleteBookmark(id);
-					else
-						Log.e(LOGTAG, "onItemLongClick: Unknown parent list: " + parent);
-				}
-				return true;
+		popup.setOnMenuItemClickListener(item -> {
+			if(item.getItemId() == R.id.bookmarks_edit) {
+				if(parent==lv_categories)
+					new EditBookmarkCategoryDialog(activity, id);
+				else if(parent==lv_bookmarks)
+					new EditBookmarkDialog(activity, id);
+				else
+					Log.e(LOGTAG, "onItemLongClick: Unknown parent list: " + parent);
 			}
+			else if(item.getItemId() == R.id.bookmarks_delete) {
+				if(parent==lv_categories)
+					deleteCategory(id);
+				else if(parent==lv_bookmarks)
+					deleteBookmark(id);
+				else
+					Log.e(LOGTAG, "onItemLongClick: Unknown parent list: " + parent);
+			}
+			return true;
 		});
 		popup.show();
 		return true;
@@ -246,20 +235,12 @@ public class BookmarksDialog implements View.OnClickListener, AdapterView.OnItem
 			new AlertDialog.Builder(activity)
 					.setTitle("Delete Category")
 					.setMessage("Category contains " + cursor.getCount() + " Bookmarks that will be deleted too!")
-					.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							// Delete category (will cascade delete all contained bookmarks)
-							activity.getContentResolver().delete(ContentUris.withAppendedId(BookmarkCategories.CONTENT_URI, id), null, null);
-							reloadCategories();
-						}
+					.setPositiveButton("Delete", (dialog1, which) -> {
+						// Delete category (will cascade delete all contained bookmarks)
+						activity.getContentResolver().delete(ContentUris.withAppendedId(BookmarkCategories.CONTENT_URI, id), null, null);
+						reloadCategories();
 					})
-					.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							// do nothing
-						}
-					})
+					.setNegativeButton("Cancel", (dialog12, which) -> {/*do nothing*/})
 					.create()
 					.show();
 		} else {
@@ -403,60 +384,53 @@ public class BookmarksDialog implements View.OnClickListener, AdapterView.OnItem
 			final AlertDialog d = new AlertDialog.Builder(activity)
 					.setTitle(bookmarkID<0 ? "Add Bookmark" : "Edit Bookmark")
 					.setView(ll_root)
-					.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							// do nothing
-						}
+					.setNegativeButton("Cancel", (dialog1, which) -> {
+						// do nothing
 					})
 					.setPositiveButton(bookmarkID<0 ? "Add" : "Save", null) // set click listener later..
 					.create();
 			d.show();
-			d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v)
-				{
-					String name = et_name.getText().toString();
-					long categoryId = sp_category.getSelectedItemId();
+			d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+				String name = et_name.getText().toString();
+				long categoryId = sp_category.getSelectedItemId();
 
-					// Parse frequency
-					if(et_frequency.getText().length() == 0) {
-						Toast.makeText(activity, "Please specify a center frequency!", Toast.LENGTH_LONG).show();
-						return;
-					}
-					double frequency = Double.valueOf(et_frequency.getText().toString());
-					if (frequency < rfControlInterface.requestMaxSourceFrequency()/1000000)
-						frequency = frequency * 1000000;
-
-					// Parse channel width
-					if(et_channelWidth.getText().length() == 0) {
-						Toast.makeText(activity, "Please specify the channel width!", Toast.LENGTH_LONG).show();
-						return;
-					}
-					int channelWidth = Integer.valueOf(et_channelWidth.getText().toString());
-					int mode = sp_mode.getSelectedItemPosition();
-					float squelch = Float.valueOf(et_squelch.getText().toString());
-					String comment = et_comment.getText().toString();
-
-					ContentValues values = new ContentValues();
-					values.put(Bookmarks.COLUMN_NAME_NAME, name);
-					values.put(Bookmarks.COLUMN_NAME_COMMENT, comment);
-					values.put(Bookmarks.COLUMN_NAME_CATEGORY_ID, categoryId);
-					values.put(Bookmarks.COLUMN_NAME_FREQUENCY, frequency);
-					values.put(Bookmarks.COLUMN_NAME_CHANNEL_WIDTH, channelWidth);
-					values.put(Bookmarks.COLUMN_NAME_MODE, mode);
-					values.put(Bookmarks.COLUMN_NAME_SQUELCH, squelch);
-
-					if(bookmarkID >= 0)
-						activity.getContentResolver().update(ContentUris.withAppendedId(Bookmarks.CONTENT_URI,bookmarkID), values, null, null);
-					else
-						activity.getContentResolver().insert(Bookmarks.CONTENT_URI, values);
-
-					if(bookmarksCursor != null)
-						bookmarksCursor.requery();
-
-					d.dismiss();
+				// Parse frequency
+				if(et_frequency.getText().length() == 0) {
+					Toast.makeText(activity, "Please specify a center frequency!", Toast.LENGTH_LONG).show();
+					return;
 				}
+				double frequency = Double.valueOf(et_frequency.getText().toString());
+				if (frequency < rfControlInterface.requestMaxSourceFrequency()/1000000)
+					frequency = frequency * 1000000;
+
+				// Parse channel width
+				if(et_channelWidth.getText().length() == 0) {
+					Toast.makeText(activity, "Please specify the channel width!", Toast.LENGTH_LONG).show();
+					return;
+				}
+				int channelWidth = Integer.valueOf(et_channelWidth.getText().toString());
+				int mode = sp_mode.getSelectedItemPosition();
+				float squelch = Float.valueOf(et_squelch.getText().toString());
+				String comment = et_comment.getText().toString();
+
+				ContentValues values = new ContentValues();
+				values.put(Bookmarks.COLUMN_NAME_NAME, name);
+				values.put(Bookmarks.COLUMN_NAME_COMMENT, comment);
+				values.put(Bookmarks.COLUMN_NAME_CATEGORY_ID, categoryId);
+				values.put(Bookmarks.COLUMN_NAME_FREQUENCY, frequency);
+				values.put(Bookmarks.COLUMN_NAME_CHANNEL_WIDTH, channelWidth);
+				values.put(Bookmarks.COLUMN_NAME_MODE, mode);
+				values.put(Bookmarks.COLUMN_NAME_SQUELCH, squelch);
+
+				if(bookmarkID >= 0)
+					activity.getContentResolver().update(ContentUris.withAppendedId(Bookmarks.CONTENT_URI,bookmarkID), values, null, null);
+				else
+					activity.getContentResolver().insert(Bookmarks.CONTENT_URI, values);
+
+				if(bookmarksCursor != null)
+					bookmarksCursor.requery();
+
+				d.dismiss();
 			});
 
 		}
@@ -488,29 +462,23 @@ public class BookmarksDialog implements View.OnClickListener, AdapterView.OnItem
 			new AlertDialog.Builder(activity)
 					.setTitle(categoryID<0 ? "Add Category" : "Edit Category")
 					.setView(ll_root)
-					.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							// do nothing
-						}
+					.setNegativeButton("Cancel", (dialog1, which) -> {
+						// do nothing
 					})
-					.setPositiveButton(categoryID<0 ? "Add" : "Save", new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							String name = et_name.getText().toString();
-							String comment = et_description.getText().toString();
+					.setPositiveButton(categoryID<0 ? "Add" : "Save", (dialog12, which) -> {
+						String name = et_name.getText().toString();
+						String comment = et_description.getText().toString();
 
-							ContentValues values = new ContentValues();
-							values.put(BookmarkCategories.COLUMN_NAME_CATEGORY_NAME, name);
-							values.put(BookmarkCategories.COLUMN_NAME_DESCRIPTION, comment);
+						ContentValues values = new ContentValues();
+						values.put(BookmarkCategories.COLUMN_NAME_CATEGORY_NAME, name);
+						values.put(BookmarkCategories.COLUMN_NAME_DESCRIPTION, comment);
 
-							if(categoryID >= 0)
-								activity.getContentResolver().update(ContentUris.withAppendedId(BookmarkCategories.CONTENT_URI,categoryID), values, null, null);
-							else
-								activity.getContentResolver().insert(BookmarkCategories.CONTENT_URI, values);
+						if(categoryID >= 0)
+							activity.getContentResolver().update(ContentUris.withAppendedId(BookmarkCategories.CONTENT_URI,categoryID), values, null, null);
+						else
+							activity.getContentResolver().insert(BookmarkCategories.CONTENT_URI, values);
 
-							reloadCategories();
-						}
+						reloadCategories();
 					})
 					.create()
 					.show();
