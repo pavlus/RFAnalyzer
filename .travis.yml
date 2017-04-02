@@ -5,14 +5,13 @@ notifications:
   email: false
 android:
   components:
-    # some magic to get around build tools 25 license <--> travis buggy interaction
-    - tools
-    - extra
+    # some magic to get around build tools 25 license <--> travis buggy interaction, don't change order
     - tools
     # The BuildTools version used by your project
     - build-tools-25.0.2
-    - platform-tools
     - android-25
+    - extra
+    - platform-tools
 
     # Additional components
     #- extra-android-support
